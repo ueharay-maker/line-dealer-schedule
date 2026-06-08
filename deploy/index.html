@@ -1,0 +1,2865 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LINEディーラー募集配信スケジュール</title>
+    <style>
+      :root {
+        --slate-50: #f8fafc;
+        --slate-100: #f1f5f9;
+        --slate-200: #e2e8f0;
+        --slate-300: #cbd5e1;
+        --slate-400: #94a3b8;
+        --slate-500: #64748b;
+        --slate-600: #475569;
+        --slate-700: #334155;
+        --slate-800: #1e293b;
+        --slate-900: #0f172a;
+        --blue-50: #eff6ff;
+        --blue-100: #dbeafe;
+        --blue-500: #3b82f6;
+        --blue-600: #2563eb;
+        --blue-700: #1d4ed8;
+        --emerald-50: #ecfdf5;
+        --emerald-100: #d1fae5;
+        --emerald-600: #059669;
+        --amber-50: #fffbeb;
+        --amber-100: #fef3c7;
+        --amber-600: #d97706;
+        --rose-50: #fff1f2;
+        --rose-100: #ffe4e6;
+        --rose-600: #e11d48;
+        --white: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--slate-50);
+        color: var(--slate-900);
+        font-family:
+          Inter,
+          "Hiragino Sans",
+          "Hiragino Kaku Gothic ProN",
+          "Noto Sans JP",
+          system-ui,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border-bottom: 1px solid var(--slate-200);
+        background: rgba(248, 250, 252, 0.95);
+        backdrop-filter: blur(12px);
+      }
+
+      .topbar-inner {
+        display: flex;
+        max-width: 1520px;
+        min-height: 74px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 0 auto;
+        padding: 12px 22px;
+      }
+
+      .eyebrow {
+        margin: 0;
+        color: var(--emerald-600);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        margin: 2px 0 0;
+        color: var(--slate-900);
+        font-size: 22px;
+        font-weight: 900;
+        line-height: 1.2;
+        letter-spacing: 0;
+      }
+
+      .top-actions,
+      .inline-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .button,
+      .link-button {
+        display: inline-flex;
+        min-height: 36px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--slate-200);
+        border-radius: 8px;
+        background: var(--white);
+        color: var(--slate-700);
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1;
+        text-decoration: none;
+        transition:
+          background 0.16s ease,
+          border-color 0.16s ease,
+          color 0.16s ease;
+      }
+
+      .button:hover,
+      .link-button:hover {
+        border-color: var(--blue-100);
+        background: var(--blue-50);
+        color: var(--blue-700);
+      }
+
+      .button.primary {
+        border-color: var(--blue-600);
+        background: var(--blue-600);
+        color: var(--white);
+      }
+
+      .button.primary:hover {
+        border-color: var(--blue-700);
+        background: var(--blue-700);
+        color: var(--white);
+      }
+
+      .app {
+        max-width: 1520px;
+        margin: 0 auto;
+        padding: 18px 22px 28px;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+      }
+
+      .sidebar,
+      .workspace {
+        display: grid;
+        gap: 16px;
+        min-width: 0;
+      }
+
+      .panel {
+        overflow: hidden;
+        border: 1px solid var(--slate-200);
+        border-radius: 8px;
+        background: var(--white);
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+      }
+
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid var(--slate-100);
+        padding: 13px 15px;
+      }
+
+      .panel-title {
+        margin: 0;
+        color: var(--slate-900);
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .panel-note {
+        margin: 3px 0 0;
+        color: var(--slate-500);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .panel-body {
+        padding: 15px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--slate-700);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      input[type="date"],
+      input[type="number"] {
+        min-height: 38px;
+        width: 100%;
+        border: 1px solid var(--slate-200);
+        border-radius: 8px;
+        background: var(--white);
+        color: var(--slate-900);
+        padding: 8px 10px;
+        font-size: 14px;
+        outline: none;
+      }
+
+      input:focus {
+        border-color: var(--blue-600);
+        box-shadow: 0 0 0 3px var(--blue-100);
+      }
+
+      .form-grid,
+      .rule-list,
+      .event-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .rule-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 74px;
+        gap: 10px;
+        align-items: center;
+        border: 1px solid var(--slate-200);
+        border-radius: 8px;
+        background: var(--slate-50);
+        padding: 10px;
+      }
+
+      .rule-name,
+      .event-name {
+        margin: 0;
+        color: var(--slate-900);
+        font-size: 13px;
+        font-weight: 900;
+        line-height: 1.35;
+      }
+
+      .rule-window,
+      .event-date {
+        margin: 2px 0 0;
+        color: var(--slate-500);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .event-toggle {
+        display: grid;
+        grid-template-columns: 18px minmax(0, 1fr);
+        gap: 9px;
+        align-items: start;
+        width: 100%;
+        border: 1px solid var(--slate-200);
+        border-radius: 8px;
+        background: var(--white);
+        padding: 10px;
+        text-align: left;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        margin-top: 4px;
+        border-radius: 999px;
+        background: var(--event-color, var(--blue-500));
+      }
+
+      .search-input {
+        min-height: 38px;
+        width: 100%;
+        border: 1px solid var(--slate-200);
+        border-radius: 8px;
+        background: var(--white);
+        color: var(--slate-900);
+        padding: 8px 10px 8px 34px;
+        font-size: 13px;
+        outline: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%2394a3b8' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 10px center;
+      }
+
+      .search-input:focus {
+        border-color: var(--blue-600);
+        box-shadow: 0 0 0 3px var(--blue-100);
+      }
+
+      .event-list {
+        max-height: 420px;
+        overflow-y: auto;
+        padding-right: 2px;
+      }
+
+      .event-toggle.selected {
+        border-color: color-mix(in srgb, var(--event-color, var(--blue-500)) 40%, var(--slate-200));
+        background: color-mix(in srgb, var(--event-color, var(--blue-500)) 8%, var(--white));
+      }
+
+      .event-toggle[aria-pressed="false"] {
+        opacity: 0.5;
+      }
+
+      .filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        padding: 0 15px 12px;
+      }
+
+      .filter-bar .legend-label {
+        margin-right: 2px;
+      }
+
+      .filter-button {
+        display: inline-flex;
+        min-height: 30px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--slate-200);
+        border-radius: 999px;
+        background: var(--white);
+        color: var(--slate-600);
+        padding: 5px 12px;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1;
+        transition:
+          background 0.16s ease,
+          border-color 0.16s ease,
+          color 0.16s ease;
+      }
+
+      .filter-button:hover {
+        border-color: var(--blue-100);
+        background: var(--blue-50);
+        color: var(--blue-700);
+      }
+
+      .filter-button.active {
+        border-color: var(--blue-600);
+        background: var(--blue-600);
+        color: var(--white);
+      }
+
+      .filter-button.active[data-filter="ok"] {
+        border-color: var(--emerald-600);
+        background: var(--emerald-600);
+        color: var(--white);
+      }
+
+      .filter-button.active[data-filter="adjusted"] {
+        border-color: var(--amber-600);
+        background: var(--amber-600);
+        color: var(--white);
+      }
+
+      .filter-button.active[data-filter="blocked"] {
+        border-color: var(--rose-600);
+        background: var(--rose-600);
+        color: var(--white);
+      }
+
+      .month-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .month-title strong {
+        color: var(--slate-900);
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .calendar-wrap {
+        overflow-x: auto;
+      }
+
+      .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(132px, 1fr));
+        min-width: 980px;
+        border-top: 1px solid var(--slate-200);
+        border-left: 1px solid var(--slate-200);
+      }
+
+      .weekday,
+      .day {
+        border-right: 1px solid var(--slate-200);
+        border-bottom: 1px solid var(--slate-200);
+      }
+
+      .weekday {
+        min-height: 42px;
+        background: var(--slate-50);
+        color: var(--slate-800);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .weekday.saturday {
+        color: var(--blue-700);
+        background: var(--blue-50);
+      }
+
+      .weekday.sunday,
+      .day.sunday .day-number {
+        color: #dc2626;
+      }
+
+      .weekday.sunday {
+        background: #fff5f5;
+      }
+
+      .day {
+        min-height: 120px;
+        background: var(--white);
+        padding: 8px;
+        transition: background 0.12s ease;
+        align-content: start;
+      }
+
+      .day.outside {
+        background: #f3f6fa;
+      }
+
+      .day.heat-0 {
+        background: var(--white);
+      }
+
+      .day.heat-1 {
+        background: #ecfdf5;
+      }
+
+      .day.heat-2 {
+        background: #86efac;
+      }
+
+      .day.heat-3plus {
+        background: #fecaca;
+      }
+
+      .day.outside.heat-0 {
+        background: #f3f6fa;
+      }
+
+      .day.outside.heat-1 {
+        background: #e8faf3;
+      }
+
+      .day.outside.heat-2 {
+        background: #bbf7d0;
+      }
+
+      .day.outside.heat-3plus {
+        background: #fecaca;
+      }
+
+      .day-count {
+        float: right;
+        margin: 0;
+        min-width: 18px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.08);
+        color: var(--slate-600);
+        padding: 1px 5px;
+        font-size: 10px;
+        font-weight: 900;
+        line-height: 1.4;
+        text-align: center;
+      }
+
+      .day.heat-3plus .day-count {
+        background: var(--rose-600);
+        color: var(--white);
+      }
+
+      .day.today {
+        box-shadow: inset 0 0 0 2px var(--blue-500);
+      }
+
+      .day.today .day-number {
+        display: inline-flex;
+        min-width: 28px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        background: var(--blue-600);
+        color: var(--white);
+        padding: 2px 6px;
+      }
+
+      .day-number {
+        margin: 0;
+        color: var(--slate-900);
+        font-size: 18px;
+        font-weight: 900;
+        line-height: 1;
+      }
+
+      .send-card {
+        margin-top: 8px;
+        border: 2px solid color-mix(in srgb, var(--event-color, var(--blue-500)) 64%, #ffffff);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--event-color, var(--blue-500)) 13%, #ffffff);
+        padding: 8px;
+        color: var(--slate-900);
+        cursor: pointer;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+      }
+
+      .send-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.1);
+      }
+
+      .send-card.adjusted {
+        border-style: solid;
+        background: color-mix(in srgb, var(--event-color, var(--blue-500)) 20%, #ffffff);
+        border-color: color-mix(in srgb, var(--event-color, var(--blue-500)) 75%, #ffffff);
+      }
+
+      .send-card-header {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+      }
+
+      .send-phase {
+        margin: 0 0 0 14px;
+        max-width: 100%;
+        color: var(--slate-700);
+        font-size: 11px;
+        font-weight: 900;
+        line-height: 1.35;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+      }
+
+      .send-line {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        min-width: 0;
+      }
+
+      .send-dot {
+        width: 8px;
+        height: 8px;
+        flex: 0 0 auto;
+        margin-top: 4px;
+        border-radius: 999px;
+        background: var(--event-color, var(--blue-500));
+      }
+
+      .send-title {
+        min-width: 0;
+        flex: 1 1 auto;
+        margin: 0;
+        color: color-mix(in srgb, var(--event-color, var(--blue-500)) 58%, #0f172a);
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1.35;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+      }
+
+      .send-meta {
+        margin: 4px 0 0;
+        color: var(--slate-600);
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.4;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+      }
+
+      .send-meta.topic {
+        color: var(--slate-700);
+        font-weight: 800;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--slate-200);
+        border-radius: 999px;
+        background: var(--slate-50);
+        color: var(--slate-700);
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 900;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .badge.ok {
+        border-color: var(--emerald-100);
+        background: var(--emerald-50);
+        color: var(--emerald-600);
+      }
+
+      .badge.adjusted {
+        border-color: var(--amber-100);
+        background: var(--amber-50);
+        color: var(--amber-600);
+      }
+
+      .badge.blocked {
+        border-color: var(--rose-100);
+        background: var(--rose-50);
+        color: var(--rose-600);
+      }
+
+      .table-shell {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        min-width: 1180px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--slate-100);
+        padding: 11px 12px;
+        text-align: left;
+        vertical-align: top;
+        font-size: 13px;
+      }
+
+      th {
+        position: sticky;
+        top: 74px;
+        z-index: 5;
+        background: var(--slate-100);
+        color: var(--slate-600);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+      }
+
+      tbody tr {
+        cursor: pointer;
+        transition: background 0.12s ease;
+      }
+
+      tbody tr:hover {
+        background: var(--blue-50);
+      }
+
+      tbody tr.row-ok {
+        background: color-mix(in srgb, var(--emerald-50) 55%, var(--white));
+      }
+
+      tbody tr.row-adjusted {
+        background: color-mix(in srgb, var(--amber-50) 70%, var(--white));
+      }
+
+      tbody tr.row-blocked {
+        background: color-mix(in srgb, var(--rose-50) 65%, var(--white));
+      }
+
+      tbody tr.row-ok:hover,
+      tbody tr.row-adjusted:hover,
+      tbody tr.row-blocked:hover {
+        background: var(--blue-50);
+      }
+
+      tbody tr.month-divider {
+        cursor: default;
+        background: var(--slate-100);
+      }
+
+      tbody tr.month-divider:hover {
+        background: var(--slate-100);
+      }
+
+      tbody tr.month-divider td {
+        padding: 8px 12px;
+        color: var(--slate-700);
+        font-size: 12px;
+        font-weight: 900;
+        border-bottom-color: var(--slate-200);
+      }
+
+      tbody tr.is-hidden {
+        display: none;
+      }
+
+      .topic-cell {
+        max-width: 220px;
+        line-height: 1.45;
+      }
+
+      .upcoming-table {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+      }
+
+      .upcoming-table th {
+        position: static;
+        top: auto;
+        z-index: auto;
+      }
+
+      .upcoming-table th:nth-child(1),
+      .upcoming-table td:nth-child(1) {
+        width: 108px;
+      }
+
+      .upcoming-table th:nth-child(2),
+      .upcoming-table td:nth-child(2) {
+        width: 72px;
+      }
+
+      .upcoming-table th:nth-child(5),
+      .upcoming-table td:nth-child(5) {
+        width: 148px;
+      }
+
+      .upcoming-table th:nth-child(6),
+      .upcoming-table td:nth-child(6) {
+        width: 112px;
+      }
+
+      #upcomingTableShell {
+        width: 100%;
+      }
+
+      .upcoming-table th:nth-child(3),
+      .upcoming-table td:nth-child(3),
+      .upcoming-table th:nth-child(4),
+      .upcoming-table td:nth-child(4) {
+        word-break: break-word;
+        overflow-wrap: anywhere;
+      }
+
+      .upcoming-table th:last-child,
+      .upcoming-table td:last-child {
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .upcoming-table .assignee-select {
+        min-width: 132px;
+        border: 1px solid var(--slate-200);
+        border-radius: 6px;
+        background: var(--white);
+        color: var(--slate-900);
+        padding: 6px 8px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .upcoming-table .reserve-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--slate-700);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .upcoming-table .reserve-check input {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--emerald-600);
+        cursor: pointer;
+      }
+
+      .upcoming-table tbody tr.row-reserved {
+        background: color-mix(in srgb, var(--emerald-50) 70%, var(--white));
+      }
+
+      .upcoming-table tbody tr.row-reserved:hover {
+        background: color-mix(in srgb, var(--emerald-50) 85%, var(--white));
+      }
+
+      .upcoming-empty {
+        margin: 0;
+        padding: 14px 2px 4px;
+        font-size: 13px;
+      }
+
+      .upcoming-event {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 900;
+      }
+
+      .upcoming-event .dot {
+        width: 8px;
+        height: 8px;
+      }
+
+      .account-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border: 1px solid var(--slate-200);
+        border-radius: 999px;
+        background: var(--slate-50);
+        padding: 3px 8px;
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--slate-700);
+        white-space: nowrap;
+      }
+
+      .account-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        flex: 0 0 auto;
+      }
+
+      .rule-row.fixed-row {
+        background: var(--blue-50);
+        border-color: var(--blue-100);
+      }
+
+      .rule-row .rule-kind {
+        margin-top: 4px;
+      }
+
+      .day-sends {
+        display: grid;
+        gap: 6px;
+        margin-top: 6px;
+      }
+
+      .send-card.compact {
+        padding: 6px;
+      }
+
+      .send-card.compact .send-title {
+        font-size: 11px;
+      }
+
+      .send-card.compact .send-phase {
+        font-size: 9px;
+      }
+
+      .send-account {
+        margin: 0 0 3px;
+        font-size: 9px;
+        font-weight: 900;
+        color: var(--slate-500);
+        letter-spacing: 0.02em;
+      }
+
+      .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .breakdown-block {
+        border: 1px solid var(--slate-100);
+        border-radius: 8px;
+        background: var(--slate-50);
+        padding: 12px;
+      }
+
+      .breakdown-title {
+        margin: 0 0 8px;
+        color: var(--slate-700);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .breakdown-list {
+        display: grid;
+        gap: 6px;
+      }
+
+      .breakdown-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 12px;
+      }
+
+      .breakdown-row strong {
+        color: var(--slate-900);
+        font-weight: 900;
+      }
+
+      .breakdown-row span {
+        color: var(--slate-500);
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .account-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .account-tab {
+        display: inline-flex;
+        min-height: 34px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--slate-200);
+        border-radius: 999px;
+        background: var(--white);
+        color: var(--slate-600);
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .account-tab:hover {
+        border-color: var(--blue-100);
+        background: var(--blue-50);
+        color: var(--blue-700);
+      }
+
+      .account-tab.active {
+        border-color: var(--blue-600);
+        background: var(--blue-600);
+        color: var(--white);
+      }
+
+      .ranking-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .ranking-table th,
+      .ranking-table td {
+        border-bottom: 1px solid var(--slate-100);
+        padding: 8px 10px;
+        font-size: 12px;
+        text-align: left;
+      }
+
+      .ranking-table th {
+        color: var(--slate-500);
+        font-weight: 900;
+      }
+
+      .ranking-table tbody tr:hover {
+        background: var(--blue-50);
+      }
+
+      .rank-bar {
+        display: inline-block;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--blue-500);
+        vertical-align: middle;
+      }
+
+      .alert-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .alert-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        border: 1px solid var(--amber-100);
+        border-radius: 8px;
+        background: var(--amber-50);
+        padding: 10px 12px;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .alert-item.gap {
+        border-color: var(--blue-100);
+        background: var(--blue-50);
+      }
+
+      .alert-item strong {
+        color: var(--amber-600);
+        white-space: nowrap;
+      }
+
+      .alert-item.gap strong {
+        color: var(--blue-700);
+      }
+
+      .progress-panel {
+        border: 1px solid var(--slate-200);
+        border-radius: 8px;
+        background: var(--slate-50);
+        padding: 12px;
+      }
+
+      .progress-title {
+        margin: 0 0 10px;
+        color: var(--slate-900);
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .progress-bar {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 4px;
+        margin-bottom: 10px;
+      }
+
+      .progress-segment {
+        height: 10px;
+        border-radius: 4px;
+        background: var(--slate-200);
+      }
+
+      .progress-segment.done {
+        background: var(--emerald-600);
+      }
+
+      .progress-segment.current {
+        background: var(--blue-500);
+      }
+
+      .progress-labels {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 4px;
+      }
+
+      .progress-labels span {
+        color: var(--slate-500);
+        font-size: 10px;
+        font-weight: 800;
+        line-height: 1.3;
+        text-align: center;
+      }
+
+      .progress-labels span.done {
+        color: var(--emerald-600);
+      }
+
+      .progress-labels span.current {
+        color: var(--blue-700);
+      }
+
+      .simulation-box {
+        margin-top: 10px;
+        border: 1px dashed var(--blue-200);
+        border-radius: 8px;
+        background: var(--blue-50);
+        padding: 10px 12px;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .simulation-box strong {
+        color: var(--blue-700);
+        font-size: 18px;
+      }
+
+      .recruitment-meter {
+        margin-top: 10px;
+      }
+
+      .meter-track {
+        overflow: hidden;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--slate-200);
+      }
+
+      .meter-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--emerald-600), var(--blue-600));
+      }
+
+      .meter-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 6px;
+        color: var(--slate-600);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .future-note {
+        margin-top: 8px;
+        color: var(--slate-500);
+        font-size: 11px;
+        line-height: 1.4;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.45);
+        padding: 20px;
+      }
+
+      .modal-overlay.show {
+        display: flex;
+      }
+
+      .modal {
+        width: min(480px, 100%);
+        max-height: 90vh;
+        overflow-y: auto;
+        border-radius: 12px;
+        background: var(--white);
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid var(--slate-100);
+        padding: 16px 18px;
+      }
+
+      .modal-title {
+        margin: 0;
+        color: var(--slate-900);
+        font-size: 16px;
+        font-weight: 900;
+        line-height: 1.35;
+      }
+
+      .modal-sub {
+        margin: 4px 0 0;
+        color: var(--slate-500);
+        font-size: 12px;
+      }
+
+      .modal-body {
+        padding: 16px 18px 18px;
+      }
+
+      .detail-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .detail-block {
+        border: 1px solid var(--slate-100);
+        border-radius: 8px;
+        background: var(--slate-50);
+        padding: 12px;
+      }
+
+      .detail-label {
+        margin: 0 0 4px;
+        color: var(--slate-500);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      .detail-value {
+        margin: 0;
+        color: var(--slate-900);
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      .detail-list {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--slate-700);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .event-toggle.focused {
+        outline: 2px solid var(--blue-500);
+        outline-offset: 1px;
+      }
+
+      .two-col-insights {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      @media (max-width: 1100px) {
+        .analytics-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .two-col-insights {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .date-cell {
+        color: var(--slate-900);
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .muted {
+        color: var(--slate-500);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .event-cell {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 40;
+        display: none;
+        max-width: 320px;
+        border-radius: 8px;
+        background: var(--slate-900);
+        color: var(--white);
+        padding: 10px 12px;
+        font-size: 13px;
+        font-weight: 800;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+      }
+
+      .toast.show {
+        display: block;
+      }
+
+      @media (max-width: 1100px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+      }
+
+      @media (max-width: 720px) {
+        .topbar-inner {
+          align-items: flex-start;
+          flex-direction: column;
+          padding: 12px 16px;
+        }
+
+        .app {
+          padding: 14px 12px 24px;
+        }
+
+        h1 {
+          font-size: 19px;
+        }
+
+        .top-actions {
+          width: 100%;
+          justify-content: flex-start;
+        }
+
+        .button,
+        .link-button {
+          flex: 1 1 auto;
+        }
+
+        .calendar {
+          min-width: 980px;
+        }
+
+        th {
+          top: 112px;
+        }
+      }
+
+      @media print {
+        .topbar,
+        .sidebar,
+        .panel-header .inline-actions,
+        .modal-overlay {
+          display: none;
+        }
+
+        body {
+          background: var(--white);
+        }
+
+        .app {
+          max-width: none;
+          padding: 0;
+        }
+
+        .layout {
+          display: block;
+        }
+
+        .panel,
+        .stat {
+          border: 0;
+          box-shadow: none;
+        }
+
+        th {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div>
+          <p class="eyebrow">OFFICIAL LINE</p>
+          <h1>LINEディーラー募集配信スケジュール</h1>
+        </div>
+        <div class="top-actions">
+          <a class="link-button" href="https://serene-pothos-6e4358.netlify.app/" target="_blank" rel="noreferrer">既存カレンダー</a>
+          <button class="button" id="copyButton" type="button">コピー</button>
+          <button class="button" id="csvButton" type="button">CSV出力</button>
+          <button class="button primary" id="printButton" type="button">印刷</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="app">
+      <div class="layout">
+        <aside class="sidebar">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">調整条件</h2>
+                <p class="panel-note">東京アカウント内のみ同日重複を回避します。地方アカウント同士は独立です。直近イベントの開催3日前〜終了日は、同アカウントの他イベント募集を停止します。</p>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="form-grid">
+                <label>
+                  配信開始日
+                  <input id="startDateInput" type="date" />
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">固定配信スケジュール</h2>
+                <p class="panel-note">各イベント共通の5本。優先度が高く、同日重複時は定期募集より先に確保します。</p>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="rule-list" id="fixedRuleList"></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">配信間隔設定</h2>
+                <p class="panel-note">募集期間中の定期配信間隔。変更すると即座に再計算されます。</p>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="rule-list" id="intervalRuleList"></div>
+              <div class="simulation-box" id="simulationBox" hidden>
+                <p style="margin:0 0 4px;color:var(--slate-600);font-weight:800">シミュレーション結果</p>
+                <p style="margin:0" id="simulationText">-</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" id="eventProgressPanel" hidden>
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">募集進捗</h2>
+                <p class="panel-note">イベントをクリックするとフェーズ進捗を表示します。</p>
+              </div>
+            </div>
+            <div class="panel-body" id="eventProgressBody"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">対象イベント</h2>
+                <p class="panel-note">クリックで選択と進捗表示。Shift+クリックで進捗のみ表示。</p>
+              </div>
+              <div class="inline-actions">
+                <button class="button" id="selectAllButton" type="button">全選択</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <input class="search-input" id="eventSearch" type="search" placeholder="イベント名・タグで検索" autocomplete="off" />
+              <div class="event-list" id="eventList" style="margin-top: 10px"></div>
+            </div>
+          </section>
+        </aside>
+
+        <div class="workspace">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">LINEアカウント表示</h2>
+                <p class="panel-note">地域単位で配信を絞り込みます。カレンダーのヒートマップも連動します。</p>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="account-tabs" id="accountTabs">
+                <button class="account-tab active" type="button" data-account="all">全体</button>
+                <button class="account-tab" type="button" data-account="tokyo">東京</button>
+                <button class="account-tab" type="button" data-account="osaka">大阪</button>
+                <button class="account-tab" type="button" data-account="fukuoka">福岡</button>
+                <button class="account-tab" type="button" data-account="sapporo">札幌</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <button class="button" id="prevMonth" type="button">← 前の月</button>
+              <div class="month-title">
+                <strong id="monthTitle">-</strong>
+                <span class="badge ok" id="monthCount">0本</span>
+              </div>
+              <button class="button" id="nextMonth" type="button">次の月 →</button>
+            </div>
+            <div class="panel-body" style="padding-top:0;padding-bottom:10px">
+              <p class="panel-note" style="margin:0">ヒートマップ: 0件=白 / 1件=薄緑 / 2件=緑 / 3件以上=赤</p>
+            </div>
+            <div class="calendar-wrap">
+              <div class="calendar" id="calendar"></div>
+            </div>
+          </section>
+
+          <section class="panel" id="upcomingPanel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">直近1週間の配信予定</h2>
+                <p class="panel-note" id="upcomingRangeNote">本日から7日間の配信を表示します。日付が進むと自動で繰り上がります。</p>
+              </div>
+              <span class="badge ok" id="upcomingCount">0件</span>
+            </div>
+            <div class="panel-body" style="padding-top: 0">
+              <p class="upcoming-empty" id="upcomingEmpty" hidden>この1週間に配信予定はありません。</p>
+              <div class="table-shell" id="upcomingTableShell">
+                <table class="upcoming-table">
+                  <thead>
+                    <tr>
+                      <th>配信日</th>
+                      <th>LINE</th>
+                      <th>イベント</th>
+                      <th>内容</th>
+                      <th>担当者</th>
+                      <th>配信予約</th>
+                    </tr>
+                  </thead>
+                  <tbody id="upcomingList"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <div class="toast" id="toast">コピーしました</div>
+
+    <div class="modal-overlay" id="detailModal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-labelledby="modalTitle">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title" id="modalTitle">配信詳細</h3>
+            <p class="modal-sub" id="modalSub"></p>
+          </div>
+          <button class="button" id="modalClose" type="button">閉じる</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+      </div>
+    </div>
+
+    <script>
+      const STORAGE_KEY = "line-dealer-schedule-v3";
+      const MS_DAY = 24 * 60 * 60 * 1000;
+      const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
+      const FIXED_NEAR_BUFFER_DAYS = 7;
+      const DENSITY_MAX_PER_DAY = 2;
+      const DENSITY_MAX_SHIFT_DAYS = 7;
+      const RECRUITMENT_PHASES = [
+        { id: "start", label: "募集開始", rules: ["fixed-3m", "fixed-1m", "early"] },
+        { id: "boost", label: "募集強化", rules: ["middle"] },
+        { id: "deadline", label: "締切促進", rules: ["late", "fixed-3w"] },
+        { id: "tentative", label: "暫定シフト", rules: ["fixed-1w"] },
+        { id: "confirmed", label: "確定シフト", rules: ["fixed-3d"] }
+      ];
+
+      const UPCOMING_WINDOW_DAYS = 7;
+      const ASSIGNEES = ["", "ゆい", "かほ", "それいけ", "さとり"];
+
+      const CARD_PHASE_LABELS = {
+        "fixed-3m": "一次募集開始",
+        "fixed-1m": "遠征募集開始",
+        "fixed-3w": "遠征締切 / 二次募集開始",
+        "fixed-1w": "暫定シフト配信",
+        "fixed-3d": "確定シフト配信",
+        early: "早期募集",
+        middle: "中期募集",
+        late: "終盤募集"
+      };
+
+      const LINE_ACCOUNTS = {
+        tokyo: { id: "tokyo", name: "JOPT Tokyo LINE", shortName: "東京", color: "#3b82f6" },
+        osaka: { id: "osaka", name: "JOPT Osaka LINE", shortName: "大阪", color: "#f97316" },
+        fukuoka: { id: "fukuoka", name: "JOPT Fukuoka LINE", shortName: "福岡", color: "#14b8a6" },
+        sapporo: { id: "sapporo", name: "JOPT Sapporo LINE", shortName: "札幌", color: "#64748b" }
+      };
+
+      const events = [
+        { id: "spadie-osaka-2026-06", name: "SPADIE Osaka", tag: "SPADIE大阪", series: "SPADIE OSAKA", lineAccount: "osaka", start: "2026-06-11", end: "2026-06-14", color: "#ef4444" },
+        { id: "jopt-tokyo-02-2026", name: "JOPT Tokyo #02", tag: "JOPT東京", series: "JOPT Tokyo", lineAccount: "tokyo", start: "2026-07-16", end: "2026-07-19", color: "#3b82f6", recruitment: { target: 80, applied: 45 } },
+        { id: "jopt-fukuoka-01-2026", name: "JOPT Fukuoka #01", tag: "JOPT福岡", series: "JOPT Fukuoka", lineAccount: "fukuoka", start: "2026-07-30", end: "2026-08-02", color: "#14b8a6" },
+        { id: "spadie-42nd-2026", name: "SPADIE 42nd", tag: "SPADIE", series: "SPADIE", lineAccount: "tokyo", start: "2026-08-07", end: "2026-08-16", color: "#a855f7", recruitment: { target: 60, applied: 28 } },
+        { id: "u30-summer-2026", name: "U-30 夏", tag: "U-30", series: "U-30", lineAccount: "tokyo", start: "2026-08-21", end: "2026-08-23", color: "#22c55e" },
+        { id: "tpc17-2026", name: "TPC17", tag: "TPC", series: "TPC", lineAccount: "osaka", start: "2026-09-10", end: "2026-09-13", color: "#ef4444" },
+        { id: "sengoku-autumn-2026", name: "戦国 秋", tag: "戦国", series: "戦国", lineAccount: "tokyo", start: "2026-09-17", end: "2026-09-26", color: "#f97316" },
+        { id: "jopt-sapporo-02-2026", name: "JOPT Sapporo #02", tag: "JOPT札幌", series: "JOPT Sapporo", lineAccount: "sapporo", start: "2026-09-18", end: "2026-09-24", color: "#64748b" },
+        { id: "jopt-tokyo-03-2026", name: "JOPT Tokyo #03", tag: "JOPT東京", series: "JOPT Tokyo", lineAccount: "tokyo", start: "2026-10-08", end: "2026-10-11", color: "#3b82f6" },
+        { id: "jopt-osaka-02-2026", name: "JOPT Osaka #02", tag: "JOPT大阪", series: "JOPT Osaka", lineAccount: "osaka", start: "2026-10-29", end: "2026-11-02", color: "#f97316" },
+        { id: "spadie-43rd-2026", name: "SPADIE 43rd", tag: "SPADIE", series: "SPADIE", lineAccount: "tokyo", start: "2026-11-19", end: "2026-11-23", color: "#a855f7" },
+        { id: "tpc18-spadie-2026", name: "TPC18→SPADIE変更予定", tag: "TPC/SPADIE", series: "TPC", lineAccount: "osaka", start: "2026-11-26", end: "2026-11-29", color: "#ef4444" },
+        { id: "jopt-tokyo-01-2027", name: "JOPT Tokyo #01", tag: "JOPT東京", series: "JOPT Tokyo", lineAccount: "tokyo", start: "2026-12-24", end: "2027-01-03", color: "#3b82f6" }
+      ].map((event) => ({
+        ...event,
+        startDate: parseInputDate(event.start),
+        endDate: parseInputDate(event.end),
+        account: LINE_ACCOUNTS[event.lineAccount]
+      }));
+
+      const fixedRules = [
+        { id: "fixed-3m", kind: "fixed", rank: 100, name: "一次募集開始", windowLabel: "3か月前", offset: { unit: "months", value: -3 }, theme: "一次募集開始", shiftRange: 0 },
+        { id: "fixed-1m", kind: "fixed", rank: 90, name: "遠征募集開始", windowLabel: "1か月前", offset: { unit: "months", value: -1 }, theme: "遠征募集開始", shiftRange: 0 },
+        { id: "fixed-3w", kind: "fixed", rank: 80, name: "遠征締切 / 二次募集開始", windowLabel: "3週間前", offset: { unit: "days", value: -21 }, theme: "遠征締切 / 二次募集開始", shiftRange: 0 },
+        { id: "fixed-1w", kind: "fixed", rank: 70, name: "暫定シフト配信", windowLabel: "1週間前", offset: { unit: "days", value: -7 }, theme: "暫定シフト配信", shiftRange: 0 },
+        { id: "fixed-3d", kind: "fixed", rank: 60, name: "確定シフト配信", windowLabel: "3日前", offset: { unit: "days", value: -3 }, theme: "確定シフト配信", shiftRange: 0 }
+      ];
+
+      const intervalRules = [
+        {
+          id: "early",
+          kind: "interval",
+          rank: 50,
+          name: "早期募集",
+          windowLabel: "3か月前〜2か月前",
+          start: { unit: "months", value: -3 },
+          end: { unit: "months", value: -2 },
+          interval: 7
+        },
+        {
+          id: "middle",
+          kind: "interval",
+          rank: 40,
+          name: "中期募集",
+          windowLabel: "2か月前〜1か月前",
+          start: { unit: "months", value: -2 },
+          end: { unit: "months", value: -1 },
+          interval: 5
+        },
+        {
+          id: "late",
+          kind: "interval",
+          rank: 30,
+          name: "終盤募集",
+          windowLabel: "1か月前〜2週間前",
+          start: { unit: "months", value: -1 },
+          end: { unit: "days", value: -14 },
+          interval: 4
+        }
+      ];
+
+      const rules = [...fixedRules, ...intervalRules];
+
+      const elements = {
+        startDateInput: document.getElementById("startDateInput"),
+        fixedRuleList: document.getElementById("fixedRuleList"),
+        intervalRuleList: document.getElementById("intervalRuleList"),
+        eventList: document.getElementById("eventList"),
+        selectAllButton: document.getElementById("selectAllButton"),
+        prevMonth: document.getElementById("prevMonth"),
+        nextMonth: document.getElementById("nextMonth"),
+        monthTitle: document.getElementById("monthTitle"),
+        monthCount: document.getElementById("monthCount"),
+        calendar: document.getElementById("calendar"),
+        copyButton: document.getElementById("copyButton"),
+        csvButton: document.getElementById("csvButton"),
+        printButton: document.getElementById("printButton"),
+        toast: document.getElementById("toast"),
+        eventSearch: document.getElementById("eventSearch"),
+        accountTabs: document.getElementById("accountTabs"),
+        simulationBox: document.getElementById("simulationBox"),
+        simulationText: document.getElementById("simulationText"),
+        eventProgressPanel: document.getElementById("eventProgressPanel"),
+        eventProgressBody: document.getElementById("eventProgressBody"),
+        detailModal: document.getElementById("detailModal"),
+        modalTitle: document.getElementById("modalTitle"),
+        modalSub: document.getElementById("modalSub"),
+        modalBody: document.getElementById("modalBody"),
+        modalClose: document.getElementById("modalClose"),
+        upcomingRangeNote: document.getElementById("upcomingRangeNote"),
+        upcomingCount: document.getElementById("upcomingCount"),
+        upcomingEmpty: document.getElementById("upcomingEmpty"),
+        upcomingTableShell: document.getElementById("upcomingTableShell"),
+        upcomingList: document.getElementById("upcomingList")
+      };
+
+      const state = loadState();
+      let accountFilter = "all";
+      let eventSearchQuery = "";
+      let focusedEventId = null;
+      let simulationBaseline = null;
+      let currentMonth = new Date(parseInputDate(state.startDate).getFullYear(), parseInputDate(state.startDate).getMonth(), 1);
+      let latestRows = [];
+      const rowById = new Map();
+
+      init();
+
+      function init() {
+        elements.startDateInput.value = state.startDate;
+        renderFixedRules();
+        renderIntervalRules();
+        renderEvents();
+        bindEvents();
+        render();
+      }
+
+      function loadState() {
+        const fallbackStart = toInputDate(startOfDay(new Date()));
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+          const intervals = saved.intervals || {};
+          for (const rule of intervalRules) {
+            rule.interval = clamp(Number(intervals[rule.id] || rule.interval), 1, 30);
+          }
+          return {
+            startDate: saved.startDate || fallbackStart,
+            selectedIds: new Set(Array.isArray(saved.selectedIds) && saved.selectedIds.length ? saved.selectedIds : events.map((event) => event.id)),
+            deliveryMeta: normalizeDeliveryMeta(saved.deliveryMeta)
+          };
+        } catch {
+          return {
+            startDate: fallbackStart,
+            selectedIds: new Set(events.map((event) => event.id)),
+            deliveryMeta: {}
+          };
+        }
+      }
+
+      function normalizeDeliveryMeta(raw) {
+        if (!raw || typeof raw !== "object") return {};
+        const meta = {};
+        for (const [rowId, value] of Object.entries(raw)) {
+          if (!value || typeof value !== "object") continue;
+          meta[rowId] = {
+            assignee: typeof value.assignee === "string" ? value.assignee : "",
+            reserved: Boolean(value.reserved)
+          };
+        }
+        return meta;
+      }
+
+      function saveState() {
+        const intervals = Object.fromEntries(intervalRules.map((rule) => [rule.id, rule.interval]));
+        try {
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({
+              startDate: state.startDate,
+              selectedIds: [...state.selectedIds],
+              intervals,
+              deliveryMeta: state.deliveryMeta
+            })
+          );
+        } catch {
+          // 保存できなくても画面上のスケジュール生成は継続します。
+        }
+      }
+
+      function bindEvents() {
+        elements.startDateInput.addEventListener("input", () => {
+          state.startDate = elements.startDateInput.value;
+          const parsed = parseInputDate(state.startDate);
+          if (parsed) currentMonth = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
+          saveState();
+          render();
+        });
+
+        elements.prevMonth.addEventListener("click", () => {
+          currentMonth = addMonths(currentMonth, -1);
+          renderCalendar(latestRows);
+        });
+
+        elements.nextMonth.addEventListener("click", () => {
+          currentMonth = addMonths(currentMonth, 1);
+          renderCalendar(latestRows);
+        });
+
+        elements.selectAllButton.addEventListener("click", () => {
+          const visibleEvents = events.filter((event) => matchesEventSearch(event));
+          const allSelected = visibleEvents.length > 0 && visibleEvents.every((event) => state.selectedIds.has(event.id));
+          for (const event of visibleEvents) {
+            if (allSelected) state.selectedIds.delete(event.id);
+            else state.selectedIds.add(event.id);
+          }
+          saveState();
+          renderEvents();
+          render();
+        });
+
+        elements.copyButton.addEventListener("click", copySchedule);
+        elements.csvButton.addEventListener("click", downloadCsv);
+        elements.printButton.addEventListener("click", () => window.print());
+
+        elements.eventSearch.addEventListener("input", () => {
+          eventSearchQuery = elements.eventSearch.value.trim().toLowerCase();
+          renderEvents();
+        });
+
+        elements.accountTabs.querySelectorAll(".account-tab").forEach((button) => {
+          button.addEventListener("click", () => {
+            accountFilter = button.dataset.account;
+            elements.accountTabs.querySelectorAll(".account-tab").forEach((item) => item.classList.toggle("active", item === button));
+            refreshViews();
+          });
+        });
+
+        elements.modalClose.addEventListener("click", closeDetailModal);
+        elements.detailModal.addEventListener("click", (event) => {
+          if (event.target === elements.detailModal) closeDetailModal();
+        });
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") closeDetailModal();
+        });
+
+        elements.upcomingList.addEventListener("change", (event) => {
+          const rowEl = event.target.closest("tr[data-row-id]");
+          if (!rowEl) return;
+          const rowId = rowEl.dataset.rowId;
+          if (event.target.matches("select.assignee-select")) {
+            setDeliveryMeta(rowId, { assignee: event.target.value });
+            rowEl.classList.toggle("row-reserved", getDeliveryMeta(rowId).reserved);
+            return;
+          }
+          if (event.target.matches('input[type="checkbox"]')) {
+            setDeliveryMeta(rowId, { reserved: event.target.checked });
+            rowEl.classList.toggle("row-reserved", event.target.checked);
+          }
+        });
+
+        elements.upcomingList.addEventListener("click", (event) => {
+          const rowEl = event.target.closest("tr[data-row-id]");
+          if (!rowEl || event.target.closest("select, input, label")) return;
+          openDetailModal(rowById.get(rowEl.dataset.rowId));
+        });
+      }
+
+      function refreshViews() {
+        renderCalendar(latestRows);
+        renderUpcomingList();
+        if (focusedEventId) renderEventProgress(focusedEventId, latestRows);
+      }
+
+      function getSelectedEvents() {
+        const startDate = parseInputDate(state.startDate);
+        return events.filter((event) => state.selectedIds.has(event.id) && event.endDate >= startDate);
+      }
+
+      function getFilteredRows() {
+        if (accountFilter === "all") return latestRows;
+        return latestRows.filter((row) => row.event.lineAccount === accountFilter);
+      }
+
+      function getUpcomingWindow() {
+        const start = startOfDay(new Date());
+        const end = addDays(start, UPCOMING_WINDOW_DAYS - 1);
+        return { start, end };
+      }
+
+      function getUpcomingRows() {
+        const { start, end } = getUpcomingWindow();
+        return getFilteredRows()
+          .filter((row) => row.assignedDate && row.assignedDate >= start && row.assignedDate <= end)
+          .sort((a, b) => a.assignedDate - b.assignedDate || a.event.name.localeCompare(b.event.name, "ja"));
+      }
+
+      function getDeliveryMeta(rowId) {
+        return state.deliveryMeta[rowId] || { assignee: "", reserved: false };
+      }
+
+      function setDeliveryMeta(rowId, patch) {
+        const current = getDeliveryMeta(rowId);
+        state.deliveryMeta[rowId] = { ...current, ...patch };
+        saveState();
+      }
+
+      function renderAssigneeOptions(selected) {
+        const options = ASSIGNEES.map((name) => {
+          const label = name || "未選択";
+          const selectedAttr = name === selected ? " selected" : "";
+          return `<option value="${escapeHtml(name)}"${selectedAttr}>${escapeHtml(label)}</option>`;
+        });
+        return options.join("");
+      }
+
+      function renderUpcomingList() {
+        const { start, end } = getUpcomingWindow();
+        const rows = getUpcomingRows();
+
+        elements.upcomingRangeNote.textContent = `${formatDate(start)}（${WEEKDAYS[start.getDay()]}）〜 ${formatDate(end)}（${WEEKDAYS[end.getDay()]}）の配信予定`;
+        elements.upcomingCount.textContent = `${rows.length}件`;
+        elements.upcomingEmpty.hidden = rows.length > 0;
+        elements.upcomingTableShell.hidden = rows.length === 0;
+
+        elements.upcomingList.innerHTML = rows
+          .map((row) => {
+            const meta = getDeliveryMeta(row.id);
+            const phase = cardPhaseLabel(row.rule);
+            const kindLabel = row.rule.kind === "fixed" ? "固定" : "定期";
+            return `
+              <tr class="${meta.reserved ? "row-reserved" : ""}" data-row-id="${row.id}">
+                <td>
+                  <strong>${formatDate(row.assignedDate)}</strong>
+                  <div class="muted">${WEEKDAYS[row.assignedDate.getDay()]}曜</div>
+                </td>
+                <td>${escapeHtml(row.event.account.shortName)}</td>
+                <td>
+                  <span class="upcoming-event">
+                    <span class="dot" style="--event-color: ${row.event.color}"></span>
+                    ${escapeHtml(row.event.name)}
+                  </span>
+                </td>
+                <td>
+                  <strong>${escapeHtml(phase)}</strong>
+                  <div class="muted">${kindLabel}</div>
+                </td>
+                <td>
+                  <select class="assignee-select" aria-label="${escapeHtml(row.event.name)}の担当者">
+                    ${renderAssigneeOptions(meta.assignee)}
+                  </select>
+                </td>
+                <td>
+                  <label class="reserve-check">
+                    <input type="checkbox"${meta.reserved ? " checked" : ""} />
+                    予約済
+                  </label>
+                </td>
+              </tr>
+            `;
+          })
+          .join("");
+      }
+
+      function heatClass(count) {
+        if (count <= 0) return "heat-0";
+        if (count === 1) return "heat-1";
+        if (count === 2) return "heat-2";
+        return "heat-3plus";
+      }
+
+      function renderFixedRules() {
+        elements.fixedRuleList.innerHTML = fixedRules
+          .map(
+            (rule) => `
+              <div class="rule-row fixed-row">
+                <div>
+                  <p class="rule-name">${escapeHtml(rule.name)}</p>
+                  <p class="rule-window">${escapeHtml(rule.windowLabel)} · ${escapeHtml(rule.theme)}</p>
+                  <p class="rule-kind"><span class="badge ok">固定配信</span></p>
+                </div>
+              </div>
+            `
+          )
+          .join("");
+      }
+
+      function renderIntervalRules() {
+        elements.intervalRuleList.innerHTML = intervalRules
+          .map(
+            (rule) => `
+              <div class="rule-row">
+                <div>
+                  <p class="rule-name">${escapeHtml(rule.windowLabel)}</p>
+                  <p class="rule-window">${escapeHtml(rule.name)}</p>
+                </div>
+                <label>間隔<input type="number" min="1" max="30" value="${rule.interval}" data-rule-id="${rule.id}" />日</label>
+              </div>
+            `
+          )
+          .join("");
+
+        elements.intervalRuleList.querySelectorAll("input").forEach((input) => {
+          input.addEventListener("focus", () => {
+            simulationBaseline = latestRows.filter((row) => row.assignedDate).length;
+          });
+          input.addEventListener("input", (event) => {
+            const rule = intervalRules.find((item) => item.id === event.target.dataset.ruleId);
+            rule.interval = clamp(Number(event.target.value || rule.interval), 1, 30);
+            saveState();
+            render();
+          });
+        });
+      }
+
+      function accountBadge(event) {
+        return `<span class="account-badge"><span class="account-dot" style="background:${event.account.color}"></span>${escapeHtml(event.account.shortName)}</span>`;
+      }
+
+      function renderEvents() {
+        const visibleEvents = events.filter((event) => matchesEventSearch(event));
+        const allVisibleSelected = visibleEvents.length > 0 && visibleEvents.every((event) => state.selectedIds.has(event.id));
+        elements.selectAllButton.textContent = allVisibleSelected ? "全解除" : "全選択";
+        elements.eventList.innerHTML = visibleEvents.length
+          ? visibleEvents
+              .map(
+                (event) => `
+              <button class="event-toggle ${state.selectedIds.has(event.id) ? "selected" : ""}${focusedEventId === event.id ? " focused" : ""}" type="button" data-event-id="${event.id}" aria-pressed="${state.selectedIds.has(event.id)}">
+                <span class="dot" style="--event-color: ${event.color}"></span>
+                <span>
+                  <span class="event-name">${escapeHtml(event.name)} ${accountBadge(event)}</span>
+                  <span class="event-date">${escapeHtml(event.series)} · ${formatDate(event.startDate)} 〜 ${formatDate(event.endDate)}</span>
+                </span>
+              </button>
+            `
+              )
+              .join("")
+          : `<p class="muted" style="margin:0;padding:8px 2px">該当するイベントがありません</p>`;
+
+        elements.eventList.querySelectorAll("button").forEach((button) => {
+          button.addEventListener("click", (event) => {
+            const id = button.dataset.eventId;
+            if (event.shiftKey) {
+              focusedEventId = id;
+              renderEvents();
+              renderEventProgress(id, latestRows);
+              return;
+            }
+            if (state.selectedIds.has(id)) state.selectedIds.delete(id);
+            else state.selectedIds.add(id);
+            focusedEventId = id;
+            saveState();
+            renderEvents();
+            renderEventProgress(id, latestRows);
+            render();
+          });
+        });
+      }
+
+      function render() {
+        const startDate = parseInputDate(state.startDate);
+        if (!startDate) return;
+        const selectedEvents = getSelectedEvents();
+        latestRows = assignDates(buildCandidates(selectedEvents, startDate), selectedEvents);
+        rowById.clear();
+        for (const row of latestRows) rowById.set(row.id, row);
+        updateSimulationBox();
+        refreshViews();
+      }
+
+      function updateSimulationBox() {
+        if (simulationBaseline === null) {
+          elements.simulationBox.hidden = true;
+          return;
+        }
+        const current = latestRows.filter((row) => row.assignedDate).length;
+        const delta = current - simulationBaseline;
+        elements.simulationBox.hidden = false;
+        elements.simulationText.innerHTML = `配信本数 <strong>${simulationBaseline} → ${current}</strong>${delta ? ` <span style="color:${delta > 0 ? "var(--rose-600)" : "var(--emerald-600)"}">(${delta > 0 ? "+" : ""}${delta})</span>` : ""}`;
+      }
+
+      function matchesEventSearch(event) {
+        if (!eventSearchQuery) return true;
+        const haystack = `${event.name} ${event.tag} ${event.series} ${event.account.name}`.toLowerCase();
+        return haystack.includes(eventSearchQuery);
+      }
+
+      function eventsByAccount(selectedEvents) {
+        const map = Object.fromEntries(Object.keys(LINE_ACCOUNTS).map((id) => [id, []]));
+        for (const event of selectedEvents) map[event.lineAccount].push(event);
+        return map;
+      }
+
+      function fixedIdealDates(event) {
+        return fixedRules.map((rule) => resolveOffset(event.startDate, rule.offset));
+      }
+
+      function fixedNearBufferFor(rule) {
+        return Math.max(rule.interval || 0, FIXED_NEAR_BUFFER_DAYS);
+      }
+
+      function isNearFixedDelivery(date, fixedIdeal, bufferDays) {
+        for (const fixedDate of fixedIdeal) {
+          const distance = Math.abs(diffDays(fixedDate, date));
+          if (distance > 0 && distance <= bufferDays) return true;
+        }
+        return false;
+      }
+
+      function buildCandidates(selectedEvents, startDate) {
+        const candidates = [];
+        for (const event of selectedEvents) {
+          const fixedIdeal = fixedIdealDates(event);
+          const fixedDates = new Set(fixedIdeal.map(toInputDate));
+
+          for (const rule of fixedRules) {
+            const ideal = resolveOffset(event.startDate, rule.offset);
+            candidates.push(createCandidate(event, rule, ideal, ideal, ideal, 0));
+          }
+
+          for (const rule of intervalRules) {
+            const actualPhaseStart = resolveOffset(event.startDate, rule.start);
+            const phaseEnd = resolveOffset(event.startDate, rule.end);
+            const assignableStart = maxDate(actualPhaseStart, startDate);
+            if (assignableStart > phaseEnd) continue;
+            let index = 0;
+            for (let date = actualPhaseStart; date <= phaseEnd; date = addDays(date, rule.interval)) {
+              if (date < startDate) {
+                index += 1;
+                continue;
+              }
+              if (fixedDates.has(toInputDate(date))) {
+                index += 1;
+                continue;
+              }
+              // 固定配信の前後は定期募集を入れない（例: 25日が遠征締切なら24〜26日付近の終盤募集は生成しない）
+              const nearBuffer = fixedNearBufferFor(rule);
+              if (isNearFixedDelivery(date, fixedIdeal, nearBuffer)) {
+                index += 1;
+                continue;
+              }
+              candidates.push(createCandidate(event, rule, date, assignableStart, phaseEnd, index));
+              index += 1;
+            }
+          }
+        }
+        return candidates;
+      }
+
+      function createCandidate(event, rule, idealDate, windowStart, windowEnd, index) {
+        return {
+          id: `${event.id}-${rule.id}-${toInputDate(idealDate)}-${index}`,
+          event,
+          rule,
+          idealDate,
+          windowStart,
+          windowEnd,
+          topic: topicFor(rule),
+          assignedDate: null,
+          status: "unassigned",
+          reasons: [],
+          priorityEvent: null
+        };
+      }
+
+      function getDayDensity(globalCountByDate, date) {
+        return globalCountByDate.get(toInputDate(date)) || 0;
+      }
+
+      function wouldExceedDensity(globalCountByDate, date) {
+        return getDayDensity(globalCountByDate, date) >= DENSITY_MAX_PER_DAY;
+      }
+
+      function bumpDayDensity(globalCountByDate, date) {
+        const key = toInputDate(date);
+        globalCountByDate.set(key, getDayDensity(globalCountByDate, date) + 1);
+      }
+
+      function dropDayDensity(globalCountByDate, date) {
+        const key = toInputDate(date);
+        const next = getDayDensity(globalCountByDate, date) - 1;
+        if (next <= 0) globalCountByDate.delete(key);
+        else globalCountByDate.set(key, next);
+      }
+
+      function periodicMinGapFor(rule) {
+        return Math.max(rule.interval, FIXED_NEAR_BUFFER_DAYS);
+      }
+
+      function eventPeriodicMinGap(prevRule, currRule) {
+        return Math.max(periodicMinGapFor(prevRule), periodicMinGapFor(currRule));
+      }
+
+      function minPeriodicGap(date, item, periodicByEvent) {
+        const assigned = periodicByEvent[item.event.id] || [];
+        if (!assigned.length) return Infinity;
+        return Math.min(...assigned.map((existing) => Math.abs(diffDays(date, existing))));
+      }
+
+      function isPeriodicTooClose(date, item, periodicByEvent) {
+        if (item.rule.kind === "fixed") return false;
+        const minGap = periodicMinGapFor(item.rule);
+        for (const assigned of periodicByEvent[item.event.id] || []) {
+          if (Math.abs(diffDays(date, assigned)) < minGap) return true;
+        }
+        return false;
+      }
+
+      function registerPeriodicAssignment(periodicByEvent, eventId, date) {
+        if (!periodicByEvent[eventId]) periodicByEvent[eventId] = [];
+        periodicByEvent[eventId].push(startOfDay(date));
+      }
+
+      function unregisterPeriodicAssignment(periodicByEvent, eventId, date) {
+        const key = toInputDate(date);
+        if (!periodicByEvent[eventId]) return;
+        periodicByEvent[eventId] = periodicByEvent[eventId].filter((assigned) => toInputDate(assigned) !== key);
+      }
+
+      function assignDates(candidates, selectedEvents) {
+        const occupiedByAccount = Object.fromEntries(Object.keys(LINE_ACCOUNTS).map((id) => [id, new Map()]));
+        const accountEventsMap = eventsByAccount(selectedEvents);
+        const globalCountByDate = new Map();
+        const periodicByEvent = {};
+
+        const sorted = [...candidates].sort((a, b) => {
+          const kind = (b.rule.kind === "fixed") - (a.rule.kind === "fixed");
+          if (kind) return kind;
+          const rank = b.rule.rank - a.rule.rank;
+          if (rank) return rank;
+          const ideal = a.idealDate - b.idealDate;
+          if (ideal) return ideal;
+          const urgency = a.event.startDate - b.event.startDate;
+          if (urgency) return urgency;
+          return 0;
+        });
+
+        for (const item of sorted) {
+          if (item.rule.kind === "fixed") {
+            const accountId = item.event.lineAccount;
+            const occupied = occupiedByAccount[accountId];
+            const idealKey = toInputDate(item.idealDate);
+            if (occupied.has(idealKey)) {
+              const incumbent = occupied.get(idealKey);
+              item.assignedDate = null;
+              item.status = "blocked";
+              item.reasons = ["固定日重複"];
+              item.priorityEvent = incumbent?.event || null;
+              continue;
+            }
+            item.assignedDate = item.idealDate;
+            item.reasons = ["固定配信"];
+            item.priorityEvent = null;
+            item.status = "ok";
+            occupied.set(idealKey, item);
+            bumpDayDensity(globalCountByDate, item.idealDate);
+            continue;
+          }
+
+          const accountId = item.event.lineAccount;
+          const occupied = occupiedByAccount[accountId];
+          const accountEvents = accountEventsMap[accountId] || [];
+          const result = findAvailableDate(item, occupied, accountEvents, globalCountByDate, periodicByEvent);
+          if (result) {
+            item.assignedDate = result.date;
+            item.reasons = result.reasons;
+            item.priorityEvent = result.priorityEvent || null;
+            item.status = sameDate(result.date, item.idealDate) ? "ok" : "adjusted";
+            occupied.set(toInputDate(result.date), item);
+            bumpDayDensity(globalCountByDate, result.date);
+            registerPeriodicAssignment(periodicByEvent, item.event.id, result.date);
+          } else {
+            item.status = "blocked";
+            item.reasons = ["未割当"];
+          }
+        }
+
+        stabilizeSchedule(sorted, occupiedByAccount, accountEventsMap, globalCountByDate);
+
+        return sorted.sort((a, b) => {
+          if (!a.assignedDate && !b.assignedDate) return a.idealDate - b.idealDate;
+          if (!a.assignedDate) return 1;
+          if (!b.assignedDate) return -1;
+          return a.assignedDate - b.assignedDate;
+        });
+      }
+
+      function getBlackoutEvent(accountEvents, date) {
+        let found = null;
+        for (const event of accountEvents) {
+          const start = addDays(event.startDate, -3);
+          const end = event.endDate;
+          if (date >= start && date <= end) {
+            if (!found || event.startDate < found.startDate) found = event;
+          }
+        }
+        return found;
+      }
+
+      function isBlackoutForOtherEvent(date, candidateEvent, accountEvents) {
+        const blackoutEvent = getBlackoutEvent(accountEvents, date);
+        if (!blackoutEvent) return false;
+        return blackoutEvent.id !== candidateEvent.id;
+      }
+
+      function getOccupant(occupied, date) {
+        return occupied.get(toInputDate(date)) || null;
+      }
+
+      function diagnosePlacement(date, item, occupied, accountEvents, periodicByEvent = {}) {
+        const key = toInputDate(date);
+        const failures = [];
+        if (occupied.has(key)) failures.push("account");
+        if (isBlackoutForOtherEvent(date, item.event, accountEvents)) failures.push("blackout");
+        if (date < item.windowStart || date > item.windowEnd) failures.push("window");
+        if (item.rule.kind !== "fixed") {
+          const nearBuffer = fixedNearBufferFor(item.rule);
+          if (isNearFixedDelivery(date, fixedIdealDates(item.event), nearBuffer)) failures.push("fixed-near");
+          if (isPeriodicTooClose(date, item, periodicByEvent)) failures.push("periodic-close");
+        }
+        return failures;
+      }
+
+      function canPlace(date, item, occupied, accountEvents, periodicByEvent = {}) {
+        return diagnosePlacement(date, item, occupied, accountEvents, periodicByEvent).length === 0;
+      }
+
+      function buildReasons(item, offset, idealFailures, account, accountEvents, occupied) {
+        const reasons = [];
+        const priority = idealFailures.includes("account") ? getOccupant(occupied, item.idealDate) : null;
+        if (offset !== 0) reasons.push(`${offset > 0 ? "+" : ""}${offset}日調整`);
+        if (idealFailures.includes("account")) {
+          reasons.push(`${account.shortName}LINE重複`);
+          if (priority?.event) reasons.push(`${priority.event.name}優先`);
+        }
+        if (idealFailures.includes("blackout")) {
+          const blackout = getBlackoutEvent(accountEvents, item.idealDate);
+          const label = blackout ? `${blackout.name}直前期間回避` : "イベント直前期間回避";
+          reasons.push(label);
+        }
+        if (item.rule.kind === "fixed") reasons.push("固定配信");
+        return { reasons, priorityEvent: priority?.event || null };
+      }
+
+      function findAvailableDate(item, occupied, accountEvents, globalCountByDate = new Map(), periodicByEvent = {}) {
+        const idealFailures = diagnosePlacement(item.idealDate, item, occupied, accountEvents, periodicByEvent);
+        const isInterval = item.rule.kind !== "fixed";
+        const maxDistance = isInterval
+          ? Math.max(item.rule.interval, DENSITY_MAX_SHIFT_DAYS)
+          : item.rule.shiftRange;
+
+        const options = [];
+        for (let distance = 0; distance <= maxDistance; distance += 1) {
+          const offsets = distance === 0 ? [0] : [-distance, distance];
+          for (const offset of offsets) {
+            const candidate = addDays(item.idealDate, offset);
+            if (!canPlace(candidate, item, occupied, accountEvents, periodicByEvent)) continue;
+            if (isInterval && wouldExceedDensity(globalCountByDate, candidate)) continue;
+            options.push({
+              date: candidate,
+              offset,
+              density: getDayDensity(globalCountByDate, candidate)
+            });
+          }
+        }
+
+        if (!options.length) return null;
+
+        options.sort((a, b) => {
+          if (a.density !== b.density) return a.density - b.density;
+          const gapDiff = minPeriodicGap(b.date, item, periodicByEvent) - minPeriodicGap(a.date, item, periodicByEvent);
+          if (gapDiff) return gapDiff;
+          return Math.abs(a.offset) - Math.abs(b.offset);
+        });
+
+        const best = options[0];
+        const built =
+          best.offset !== 0
+            ? buildReasons(item, best.offset, idealFailures, item.event.account, accountEvents, occupied)
+            : { reasons: [], priorityEvent: null };
+        const reasons = [...built.reasons];
+        if (isInterval && best.offset !== 0 && wouldExceedDensity(globalCountByDate, item.idealDate)) {
+          reasons.push("過密回避");
+        }
+
+        return { date: best.date, reasons, priorityEvent: built.priorityEvent };
+      }
+
+      function rebuildPeriodicByEvent(rows) {
+        const periodicByEvent = {};
+        for (const row of rows) {
+          if (row.assignedDate && row.rule.kind !== "fixed") {
+            registerPeriodicAssignment(periodicByEvent, row.event.id, row.assignedDate);
+          }
+        }
+        return periodicByEvent;
+      }
+
+      function clearAssignment(row, occupiedByAccount, globalCountByDate, periodicByEvent) {
+        if (!row.assignedDate) return;
+        const accountId = row.event.lineAccount;
+        const key = toInputDate(row.assignedDate);
+        occupiedByAccount[accountId].delete(key);
+        dropDayDensity(globalCountByDate, row.assignedDate);
+        unregisterPeriodicAssignment(periodicByEvent, row.event.id, row.assignedDate);
+        row.assignedDate = null;
+      }
+
+      function hasEventPeriodicViolations(rows) {
+        for (const eventId of new Set(rows.filter((row) => row.assignedDate && row.rule.kind !== "fixed").map((row) => row.event.id))) {
+          const eventRows = rows
+            .filter((row) => row.event.id === eventId && row.assignedDate && row.rule.kind !== "fixed")
+            .sort((a, b) => a.assignedDate - b.assignedDate);
+          for (let index = 1; index < eventRows.length; index += 1) {
+            const prev = eventRows[index - 1];
+            const curr = eventRows[index];
+            const minGap = eventPeriodicMinGap(prev.rule, curr.rule);
+            if (Math.abs(diffDays(curr.assignedDate, prev.assignedDate)) < minGap) return true;
+          }
+        }
+        return false;
+      }
+
+      function hasAccountDayViolations(rows) {
+        const groups = new Map();
+        for (const row of rows) {
+          if (!row.assignedDate) continue;
+          const groupKey = `${row.event.lineAccount}:${toInputDate(row.assignedDate)}`;
+          if (!groups.has(groupKey)) groups.set(groupKey, 0);
+          groups.set(groupKey, groups.get(groupKey) + 1);
+        }
+        for (const count of groups.values()) {
+          if (count > 1) return true;
+        }
+        return false;
+      }
+
+      function stabilizeSchedule(rows, occupiedByAccount, accountEventsMap, globalCountByDate) {
+        let periodicByEvent = rebuildPeriodicByEvent(rows);
+
+        for (let pass = 0; pass < 12; pass += 1) {
+          rebalanceOvercrowdedDays(rows, occupiedByAccount, accountEventsMap, globalCountByDate, periodicByEvent);
+          periodicByEvent = rebuildPeriodicByEvent(rows);
+          enforcePeriodicSpacing(rows, occupiedByAccount, accountEventsMap, globalCountByDate);
+          periodicByEvent = rebuildPeriodicByEvent(rows);
+          enforceAccountDayUniqueness(rows, occupiedByAccount, accountEventsMap, globalCountByDate, periodicByEvent);
+          periodicByEvent = rebuildPeriodicByEvent(rows);
+
+          if (!hasEventPeriodicViolations(rows) && !hasAccountDayViolations(rows)) break;
+        }
+      }
+
+      function enforcePeriodicSpacing(rows, occupiedByAccount, accountEventsMap, globalCountByDate) {
+        let periodicByEvent = rebuildPeriodicByEvent(rows);
+        let changed = true;
+
+        while (changed) {
+          changed = false;
+          const eventIds = [
+            ...new Set(
+              rows
+                .filter((row) => row.assignedDate && row.rule.kind !== "fixed")
+                .map((row) => row.event.id)
+            )
+          ];
+
+          for (const eventId of eventIds) {
+            const eventRows = rows
+              .filter((row) => row.event.id === eventId && row.assignedDate && row.rule.kind !== "fixed")
+              .sort((a, b) => a.assignedDate - b.assignedDate);
+
+            for (let index = 1; index < eventRows.length; index += 1) {
+              const prev = eventRows[index - 1];
+              const curr = eventRows[index];
+              const minGap = eventPeriodicMinGap(prev.rule, curr.rule);
+              const gap = Math.abs(diffDays(curr.assignedDate, prev.assignedDate));
+              if (gap >= minGap) continue;
+
+              changed = true;
+              const accountId = curr.event.lineAccount;
+              const occupied = occupiedByAccount[accountId];
+              const accountEvents = accountEventsMap[accountId] || [];
+              clearAssignment(curr, occupiedByAccount, globalCountByDate, periodicByEvent);
+
+              const result = findAvailableDate(curr, occupied, accountEvents, globalCountByDate, periodicByEvent);
+              if (result && Math.abs(diffDays(result.date, prev.assignedDate)) >= minGap) {
+                curr.assignedDate = result.date;
+                curr.reasons = [...new Set([...(curr.reasons || []), ...result.reasons, "間隔調整"])];
+                curr.priorityEvent = result.priorityEvent || null;
+                curr.status = sameDate(result.date, curr.idealDate) ? "ok" : "adjusted";
+                occupied.set(toInputDate(result.date), curr);
+                bumpDayDensity(globalCountByDate, result.date);
+                registerPeriodicAssignment(periodicByEvent, curr.event.id, result.date);
+              } else {
+                curr.status = "blocked";
+                curr.reasons = [...new Set([...(curr.reasons || []), "間隔不足のため未割当"])];
+                curr.priorityEvent = null;
+              }
+
+              periodicByEvent = rebuildPeriodicByEvent(rows);
+              break;
+            }
+
+            if (changed) break;
+          }
+        }
+      }
+
+      function enforceAccountDayUniqueness(rows, occupiedByAccount, accountEventsMap, globalCountByDate, periodicByEvent) {
+        let changed = true;
+
+        while (changed) {
+          changed = false;
+          const groups = new Map();
+
+          for (const row of rows) {
+            if (!row.assignedDate) continue;
+            const groupKey = `${row.event.lineAccount}:${toInputDate(row.assignedDate)}`;
+            if (!groups.has(groupKey)) groups.set(groupKey, []);
+            groups.get(groupKey).push(row);
+          }
+
+          for (const [, groupRows] of groups) {
+            if (groupRows.length <= 1) continue;
+
+            changed = true;
+            const sorted = [...groupRows].sort((a, b) => {
+              const fixedDiff = (b.rule.kind === "fixed") - (a.rule.kind === "fixed");
+              if (fixedDiff) return fixedDiff;
+              const rankDiff = b.rule.rank - a.rule.rank;
+              if (rankDiff) return rankDiff;
+              return a.event.startDate - b.event.startDate;
+            });
+
+            for (const row of sorted.slice(1)) {
+              const accountId = row.event.lineAccount;
+              const accountEvents = accountEventsMap[accountId] || [];
+              clearAssignment(row, occupiedByAccount, globalCountByDate, periodicByEvent);
+
+              if (row.rule.kind === "fixed") {
+                row.status = "blocked";
+                row.reasons = [...new Set([...(row.reasons || []), "固定日重複"])];
+                row.priorityEvent = sorted[0]?.event || null;
+                continue;
+              }
+
+              const result = findAvailableDate(
+                row,
+                occupiedByAccount[accountId],
+                accountEvents,
+                globalCountByDate,
+                periodicByEvent
+              );
+              if (result) {
+                row.assignedDate = result.date;
+                row.reasons = [...new Set([...(row.reasons || []), ...result.reasons, "LINE重複回避"])];
+                row.priorityEvent = result.priorityEvent || null;
+                row.status = sameDate(result.date, row.idealDate) ? "ok" : "adjusted";
+                occupiedByAccount[accountId].set(toInputDate(result.date), row);
+                bumpDayDensity(globalCountByDate, result.date);
+                registerPeriodicAssignment(periodicByEvent, row.event.id, result.date);
+              } else {
+                row.status = "blocked";
+                row.reasons = [...new Set([...(row.reasons || []), "未割当"])];
+                row.priorityEvent = null;
+              }
+            }
+
+            break;
+          }
+        }
+      }
+
+      function rebalanceOvercrowdedDays(rows, occupiedByAccount, accountEventsMap, globalCountByDate, periodicByEvent = {}) {
+        const byDate = new Map();
+        for (const row of rows) {
+          if (!row.assignedDate) continue;
+          const key = toInputDate(row.assignedDate);
+          if (!byDate.has(key)) byDate.set(key, []);
+          byDate.get(key).push(row);
+        }
+
+        for (const [dateKey, dayRows] of [...byDate.entries()].sort((a, b) => b[1].length - a[1].length)) {
+          if (dayRows.length < DENSITY_MAX_PER_DAY + 1) continue;
+
+          const overflow = dayRows
+            .filter((row) => row.rule.kind !== "fixed")
+            .sort((a, b) => a.rule.rank - b.rule.rank);
+
+          for (const item of overflow) {
+            if (getDayDensity(globalCountByDate, parseInputDate(dateKey)) < DENSITY_MAX_PER_DAY + 1) break;
+
+            const accountId = item.event.lineAccount;
+            const occupied = occupiedByAccount[accountId];
+            const accountEvents = accountEventsMap[accountId] || [];
+            const currentKey = toInputDate(item.assignedDate);
+
+            dropDayDensity(globalCountByDate, item.assignedDate);
+            occupied.delete(currentKey);
+            unregisterPeriodicAssignment(periodicByEvent, item.event.id, item.assignedDate);
+
+            const result = findAvailableDate(item, occupied, accountEvents, globalCountByDate, periodicByEvent);
+            if (!result) {
+              bumpDayDensity(globalCountByDate, item.assignedDate);
+              occupied.set(currentKey, item);
+              registerPeriodicAssignment(periodicByEvent, item.event.id, item.assignedDate);
+              continue;
+            }
+
+            item.assignedDate = result.date;
+            item.reasons = [...new Set([...(item.reasons || []), ...result.reasons, "過密回避"])];
+            item.status = sameDate(result.date, item.idealDate) ? "ok" : "adjusted";
+            occupied.set(toInputDate(result.date), item);
+            bumpDayDensity(globalCountByDate, result.date);
+            registerPeriodicAssignment(periodicByEvent, item.event.id, result.date);
+          }
+        }
+      }
+
+      function renderEventProgress(eventId, rows) {
+        const event = events.find((item) => item.id === eventId);
+        if (!event) {
+          elements.eventProgressPanel.hidden = true;
+          return;
+        }
+        const eventRows = rows.filter((row) => row.event.id === eventId);
+        const now = startOfDay(new Date());
+        const phases = RECRUITMENT_PHASES.map((phase) => {
+          const phaseRows = eventRows.filter((row) => phase.rules.includes(row.rule.id));
+          const done = phaseRows.some((row) => row.assignedDate && row.assignedDate < now);
+          const current = phaseRows.some((row) => row.assignedDate && row.assignedDate >= now);
+          const scheduled = phaseRows.filter((row) => row.assignedDate).length;
+          return { ...phase, done, current, scheduled };
+        });
+        const currentPhase = phases.find((p) => p.current) || phases.find((p) => !p.done) || phases[phases.length - 1];
+
+        let recruitmentHtml = "";
+        if (event.recruitment) {
+          const rate = Math.round((event.recruitment.applied / event.recruitment.target) * 100);
+          recruitmentHtml = `
+            <div class="recruitment-meter">
+              <p class="detail-label">応募状況（デモ連携）</p>
+              <div class="meter-track"><div class="meter-fill" style="width:${rate}%"></div></div>
+              <div class="meter-meta">
+                <span>目標 ${event.recruitment.target}人</span>
+                <span>応募 ${event.recruitment.applied}人</span>
+                <span>達成率 ${rate}%</span>
+              </div>
+              <p class="future-note">※ 将来の応募数データ連携用プレビューです</p>
+            </div>
+          `;
+        } else {
+          recruitmentHtml = `<p class="future-note">応募数データ未連携（⑧ 将来対応）</p>`;
+        }
+
+        elements.eventProgressPanel.hidden = false;
+        elements.eventProgressBody.innerHTML = `
+          <div class="progress-panel">
+            <p class="progress-title">${escapeHtml(event.name)}</p>
+            <div class="progress-bar">
+              ${phases.map((p) => `<div class="progress-segment ${p.done ? "done" : p.current ? "current" : ""}"></div>`).join("")}
+            </div>
+            <div class="progress-labels">
+              ${phases.map((p) => `<span class="${p.done ? "done" : p.id === currentPhase.id ? "current" : ""}">${escapeHtml(p.label)}<br>${p.scheduled}本</span>`).join("")}
+            </div>
+            ${recruitmentHtml}
+          </div>
+        `;
+      }
+
+      function openDetailModal(row) {
+        if (!row) return;
+        elements.modalTitle.textContent = row.event.name;
+        elements.modalSub.textContent = row.rule.kind === "fixed" ? `${row.rule.name} · ${row.topic}` : row.rule.name;
+        const topicLine = row.rule.kind === "fixed" ? `<p class="muted" style="margin:6px 0 0">${escapeHtml(row.topic)}</p>` : "";
+        elements.modalBody.innerHTML = `
+          <div class="detail-grid">
+            <div class="detail-block">
+              <p class="detail-label">配信日</p>
+              <p class="detail-value">${row.assignedDate ? `${formatDate(row.assignedDate)}（${WEEKDAYS[row.assignedDate.getDay()]}）` : "未割当"}</p>
+            </div>
+            <div class="detail-block">
+              <p class="detail-label">配信情報</p>
+              <p class="detail-value" style="font-size:13px">${escapeHtml(row.event.account.name)} / ${escapeHtml(row.rule.name)} / ${row.rule.kind === "fixed" ? "固定" : "定期"}</p>
+              ${topicLine}
+            </div>
+          </div>
+        `;
+        elements.detailModal.classList.add("show");
+        elements.detailModal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeDetailModal() {
+        elements.detailModal.classList.remove("show");
+        elements.detailModal.setAttribute("aria-hidden", "true");
+      }
+
+      function cardPhaseLabel(rule) {
+        return CARD_PHASE_LABELS[rule.id] || rule.name;
+      }
+
+      function cardTooltip(row) {
+        const phase = row.rule.kind === "fixed" ? row.rule.name : cardPhaseLabel(row.rule);
+        return `${row.event.name} / ${phase} / ${cardMetaLine(row)}`;
+      }
+
+      function renderSendCard(row, compact) {
+        return `
+          <div class="send-card ${row.status}${compact ? " compact" : ""}" data-row-id="${row.id}" style="--event-color: ${row.event.color}" title="${escapeHtml(cardTooltip(row))}">
+            <p class="send-account">${escapeHtml(row.event.account.shortName)}</p>
+            <div class="send-card-header">
+              <div class="send-line">
+                <span class="send-dot"></span>
+                <p class="send-title">${escapeHtml(row.event.name)}</p>
+              </div>
+              <p class="send-phase">${escapeHtml(cardPhaseLabel(row.rule))}</p>
+            </div>
+            <p class="send-meta">${cardMetaLine(row)}</p>
+          </div>
+        `;
+      }
+
+      function renderCalendar(rows) {
+        const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+        const gridStart = addDays(monthStart, -((monthStart.getDay() + 6) % 7));
+        const filtered = getFilteredRows();
+        const monthRows = filtered.filter((row) => row.assignedDate && sameMonth(row.assignedDate, currentMonth));
+        const byDate = new Map();
+        for (const row of monthRows) {
+          const key = toInputDate(row.assignedDate);
+          if (!byDate.has(key)) byDate.set(key, []);
+          byDate.get(key).push(row);
+        }
+
+        elements.monthTitle.textContent = `${currentMonth.getFullYear()}年${currentMonth.getMonth() + 1}月`;
+        elements.monthCount.textContent = `${monthRows.length}本`;
+
+        const weekdayHtml = ["月", "火", "水", "木", "金", "土", "日"]
+          .map((day, index) => {
+            const extra = index === 5 ? "saturday" : index === 6 ? "sunday" : "";
+            return `<div class="weekday ${extra}">${day}</div>`;
+          })
+          .join("");
+
+        const daysHtml = Array.from({ length: 42 }, (_, index) => {
+          const date = addDays(gridStart, index);
+          const key = toInputDate(date);
+          const dayRows = byDate.get(key) || [];
+          const count = dayRows.length;
+          const classes = ["day", heatClass(count)];
+          if (!sameMonth(date, currentMonth)) classes.push("outside");
+          if (date.getDay() === 6) classes.push("saturday");
+          if (date.getDay() === 0) classes.push("sunday");
+          if (sameDate(date, startOfDay(new Date()))) classes.push("today");
+          const compact = count > 1;
+          return `
+            <div class="${classes.join(" ")}">
+              <p class="day-number">${date.getDate()}${count ? `<span class="day-count">${count}</span>` : ""}</p>
+              ${count ? `<div class="day-sends">${dayRows.map((row) => renderSendCard(row, compact)).join("")}</div>` : ""}
+            </div>
+          `;
+        }).join("");
+
+        elements.calendar.innerHTML = weekdayHtml + daysHtml;
+        elements.calendar.querySelectorAll(".send-card[data-row-id]").forEach((card) => {
+          card.addEventListener("click", () => openDetailModal(rowById.get(card.dataset.rowId)));
+        });
+      }
+
+      function topicFor(rule) {
+        return rule.kind === "fixed" ? rule.theme : "";
+      }
+
+      function cardMetaLine(row) {
+        return `${diffDays(row.event.startDate, row.assignedDate)}日前`;
+      }
+
+      function sendMetaLine(row) {
+        const days = cardMetaLine(row);
+        return row.rule.kind === "fixed" && row.topic ? `${days} · ${row.topic}` : days;
+      }
+
+      function rowsForExport() {
+        return latestRows
+          .map((row, index) => ({
+            No: index + 1,
+            確定配信日: row.assignedDate ? formatDate(row.assignedDate) : "",
+            曜日: row.assignedDate ? `${WEEKDAYS[row.assignedDate.getDay()]}曜日` : "",
+            LINEアカウント: row.event.account.name,
+            状態:
+              row.status === "blocked"
+                ? "未割当"
+                : row.status === "adjusted"
+                  ? `調整 ${diffDays(row.assignedDate, row.idealDate)}日`
+                  : "",
+            イベント: row.event.name,
+            シリーズ: row.event.series,
+            開催日: `${formatDate(row.event.startDate)}〜${formatDate(row.event.endDate)}`,
+            イベントまで: row.assignedDate ? `${diffDays(row.event.startDate, row.assignedDate)}日前` : "",
+            フェーズ: row.rule.name,
+            種別: row.rule.kind === "fixed" ? "固定配信" : "定期募集",
+            配信テーマ: row.rule.kind === "fixed" ? row.topic : ""
+          }));
+      }
+
+      async function copySchedule() {
+        const rows = rowsForExport().filter((row) => row.確定配信日);
+        if (!rows.length) return showToast("コピーする配信予定がありません");
+        const text = rows
+          .map(
+            (row) =>
+              `${row.No}. ${row.確定配信日}（${row.曜日}） [${row.LINEアカウント}] ${row.イベント}｜${row.フェーズ}${row.配信テーマ ? `｜${row.配信テーマ}` : ""}｜${row.状態}`
+          )
+          .join("\n");
+        try {
+          await navigator.clipboard.writeText(text);
+          showToast("配信スケジュールをコピーしました");
+        } catch {
+          showToast("コピーできませんでした");
+        }
+      }
+
+      function downloadCsv() {
+        const rows = rowsForExport();
+        if (!rows.length) return showToast("CSVにする配信予定がありません");
+        const headers = Object.keys(rows[0]);
+        const csv = [headers.join(","), ...rows.map((row) => headers.map((header) => csvEscape(row[header])).join(","))].join("\n");
+        const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `line-dealer-schedule-${state.startDate}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        showToast("CSVを作成しました");
+      }
+
+      function showToast(message) {
+        elements.toast.textContent = message;
+        elements.toast.classList.add("show");
+        window.setTimeout(() => elements.toast.classList.remove("show"), 1800);
+      }
+
+      function resolveOffset(baseDate, offset) {
+        return offset.unit === "months" ? addMonths(baseDate, offset.value) : addDays(baseDate, offset.value);
+      }
+
+      function parseInputDate(value) {
+        const [year, month, day] = String(value || "").split("-").map(Number);
+        if (!year || !month || !day) return null;
+        return new Date(year, month - 1, day);
+      }
+
+      function startOfDay(date) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      }
+
+      function addDays(date, days) {
+        const next = startOfDay(date);
+        next.setDate(next.getDate() + days);
+        return next;
+      }
+
+      function addMonths(date, months) {
+        const next = startOfDay(date);
+        const originalDay = next.getDate();
+        next.setMonth(next.getMonth() + months);
+        if (next.getDate() !== originalDay) next.setDate(0);
+        return next;
+      }
+
+      function diffDays(later, earlier) {
+        return Math.round((startOfDay(later) - startOfDay(earlier)) / MS_DAY);
+      }
+
+      function toInputDate(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+      }
+
+      function formatDate(date) {
+        return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
+      }
+
+      function formatShortDate(date) {
+        return `${String(date.getMonth() + 1).padStart(2, "0")}/${String(date.getDate()).padStart(2, "0")}`;
+      }
+
+      function sameDate(a, b) {
+        return toInputDate(a) === toInputDate(b);
+      }
+
+      function sameMonth(a, b) {
+        return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
+      }
+
+      function maxDate(a, b) {
+        return a > b ? a : b;
+      }
+
+      function minDate(a, b) {
+        return a < b ? a : b;
+      }
+
+      function clamp(value, min, max) {
+        if (!Number.isFinite(value)) return min;
+        return Math.min(max, Math.max(min, Math.round(value)));
+      }
+
+      function csvEscape(value) {
+        const text = String(value ?? "");
+        return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+    </script>
+  </body>
+</html>
