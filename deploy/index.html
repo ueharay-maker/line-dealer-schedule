@@ -2035,13 +2035,15 @@
       }
 
       function fixedNearBufferFor(rule) {
-        return Math.max(rule.interval || 0, FIXED_NEAR_BUFFER_DAYS);
+        // 定期募集フェーズごとの間隔に合わせる（近い大会で固定日以外が全滅しないようにする）
+        if (rule.kind === "fixed") return FIXED_NEAR_BUFFER_DAYS;
+        return rule.interval || FIXED_NEAR_BUFFER_DAYS;
       }
 
       function isNearFixedDelivery(date, fixedIdeal, bufferDays) {
         for (const fixedDate of fixedIdeal) {
           const distance = Math.abs(diffDays(fixedDate, date));
-          if (distance > 0 && distance <= bufferDays) return true;
+          if (distance > 0 && distance < bufferDays) return true;
         }
         return false;
       }
@@ -2062,21 +2064,22 @@
             const phaseEnd = resolveOffset(event.startDate, rule.end);
             const assignableStart = maxDate(actualPhaseStart, startDate);
             if (assignableStart > phaseEnd) continue;
+            const daysUntilEvent = diffDays(event.startDate, startDate);
+            const catchUpPhase = assignableStart > actualPhaseStart || daysUntilEvent < 50;
+            // 計画開始がフェーズ途中なら、その日から定期グリッドを切り直す（取りこぼし防止）
             let index = 0;
-            for (let date = actualPhaseStart; date <= phaseEnd; date = addDays(date, rule.interval)) {
-              if (date < startDate) {
-                index += 1;
-                continue;
-              }
+            for (let date = assignableStart; date <= phaseEnd; date = addDays(date, rule.interval)) {
               if (fixedDates.has(toInputDate(date))) {
                 index += 1;
                 continue;
               }
-              // 固定配信の前後は定期募集を入れない（例: 25日が遠征締切なら24〜26日付近の終盤募集は生成しない）
-              const nearBuffer = fixedNearBufferFor(rule);
-              if (isNearFixedDelivery(date, fixedIdeal, nearBuffer)) {
-                index += 1;
-                continue;
+              // 取りこぼしフェーズでは固定日前後の除外を緩め、残り期間の定期募集を確保する
+              if (!catchUpPhase) {
+                const nearBuffer = fixedNearBufferFor(rule);
+                if (isNearFixedDelivery(date, fixedIdeal, nearBuffer)) {
+                  index += 1;
+                  continue;
+                }
               }
               candidates.push(createCandidate(event, rule, date, assignableStart, phaseEnd, index));
               index += 1;
@@ -2253,8 +2256,13 @@
         if (isBlackoutForOtherEvent(date, item.event, accountEvents)) failures.push("blackout");
         if (date < item.windowStart || date > item.windowEnd) failures.push("window");
         if (item.rule.kind !== "fixed") {
-          const nearBuffer = fixedNearBufferFor(item.rule);
-          if (isNearFixedDelivery(date, fixedIdealDates(item.event), nearBuffer)) failures.push("fixed-near");
+          const phaseStart = resolveOffset(item.event.startDate, item.rule.start);
+          const daysUntilEvent = diffDays(item.event.startDate, item.windowStart);
+          const catchUpPhase = item.windowStart > phaseStart || daysUntilEvent < 50;
+          if (!catchUpPhase) {
+            const nearBuffer = fixedNearBufferFor(item.rule);
+            if (isNearFixedDelivery(date, fixedIdealDates(item.event), nearBuffer)) failures.push("fixed-near");
+          }
           if (isPeriodicTooClose(date, item, periodicByEvent)) failures.push("periodic-close");
         }
         return failures;

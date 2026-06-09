@@ -1,5 +1,5 @@
+headersOrigin = "config"
 plugins = []
-headers = []
 redirects = []
 
 [functions]
@@ -8,7 +8,8 @@ redirects = []
 
 [build]
 publish = "/Users/ronri/Documents/Codex/2026-06-08/https-serene-pothos-6e4358-netlify-app/deploy"
-publishOrigin = "default"
+publishOrigin = "config"
+base = "/Users/ronri/Documents/Codex/2026-06-08/https-serene-pothos-6e4358-netlify-app/deploy"
 
 [build.environment]
 
@@ -23,3 +24,10 @@ publishOrigin = "default"
 [build.processing.js]
 
 [build.services]
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+X-Frame-Options = "SAMEORIGIN"
+X-Content-Type-Options = "nosniff"
