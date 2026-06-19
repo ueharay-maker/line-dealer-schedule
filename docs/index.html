@@ -2371,18 +2371,24 @@
         return fixedRules.map((rule) => resolveOffset(event.startDate, rule.offset));
       }
 
-      function fixedNearBufferFor(rule) {
-        // 定期募集フェーズごとの間隔に合わせる（近い大会で固定日以外が全滅しないようにする）
-        if (rule.kind === "fixed") return FIXED_NEAR_BUFFER_DAYS;
-        return rule.interval || FIXED_NEAR_BUFFER_DAYS;
-      }
-
-      function isNearFixedDelivery(date, fixedIdeal, bufferDays) {
+      function isDayBeforeFixedDelivery(date, fixedIdeal) {
         for (const fixedDate of fixedIdeal) {
-          const distance = Math.abs(diffDays(fixedDate, date));
-          if (distance > 0 && distance < bufferDays) return true;
+          if (sameDate(date, addDays(fixedDate, -1))) return true;
         }
         return false;
+      }
+
+      function shouldSkipPeriodicDate(date, fixedIdeal, fixedDates) {
+        if (fixedDates.has(toInputDate(date))) return true;
+        return isDayBeforeFixedDelivery(date, fixedIdeal);
+      }
+
+      function alignToIntervalGrid(phaseStart, assignableStart, interval) {
+        let date = phaseStart;
+        while (date < assignableStart) {
+          date = addDays(date, interval);
+        }
+        return date;
       }
 
       function buildCandidates(selectedEvents, startDate) {
@@ -2401,19 +2407,14 @@
             const phaseEnd = resolveOffset(event.startDate, rule.end);
             const assignableStart = maxDate(actualPhaseStart, startDate);
             if (assignableStart > phaseEnd) continue;
-            // 計画開始がフェーズ途中なら、その日から定期グリッドを切り直す（取りこぼし防止）
             let index = 0;
-            for (let date = assignableStart; date <= phaseEnd; date = addDays(date, rule.interval)) {
-              if (fixedDates.has(toInputDate(date))) {
+            const gridStart = alignToIntervalGrid(actualPhaseStart, assignableStart, rule.interval);
+            for (let date = gridStart; date <= phaseEnd; date = addDays(date, rule.interval)) {
+              if (shouldSkipPeriodicDate(date, fixedIdeal, fixedDates)) {
                 index += 1;
                 continue;
               }
-              const nearBuffer = fixedNearBufferFor(rule);
-              if (isNearFixedDelivery(date, fixedIdeal, nearBuffer)) {
-                index += 1;
-                continue;
-              }
-              candidates.push(createCandidate(event, rule, date, assignableStart, phaseEnd, index));
+              candidates.push(createCandidate(event, rule, date, actualPhaseStart, phaseEnd, index));
               index += 1;
             }
           }
@@ -2516,7 +2517,7 @@
       }
 
       function periodicMinGapFor(rule) {
-        return Math.max(rule.interval, FIXED_NEAR_BUFFER_DAYS);
+        return rule.interval || 1;
       }
 
       function eventPeriodicMinGap(prevRule, currRule) {
@@ -2707,8 +2708,7 @@
         if (isBlackoutForOtherEvent(date, item.event, accountEvents)) failures.push("blackout");
         if (date < item.windowStart || date > item.windowEnd) failures.push("window");
         if (item.rule.kind !== "fixed") {
-          const nearBuffer = fixedNearBufferFor(item.rule);
-          if (isNearFixedDelivery(date, fixedIdealDates(item.event), nearBuffer)) failures.push("fixed-near");
+          if (isDayBeforeFixedDelivery(date, fixedIdealDates(item.event))) failures.push("fixed-near");
           if (isPeriodicTooClose(date, item, periodicByEvent)) failures.push("periodic-close");
         }
         return failures;
