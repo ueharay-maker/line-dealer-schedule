@@ -1559,24 +1559,28 @@
         { eventId: "jopt-tokyo-02-2026", ruleId: "fixed-1m", date: "2026-06-20" },
         { eventId: "u30-summer-2026", ruleId: "early", date: "2026-06-09" },
         { eventId: "jopt-fukuoka-01-2026", ruleId: "fixed-3w", date: "2026-06-24" },
-        { eventId: "jopt-fukuoka-01-2026", ruleId: "middle", date: "2026-06-12" }
+        { eventId: "jopt-fukuoka-01-2026", ruleId: "middle", date: "2026-06-12" },
+        { eventId: "sengoku-autumn-2026", ruleId: "fixed-3m", date: "2026-06-17" }
       ];
 
       const INTERVAL_ANCHORED_SERIES = [
-        { eventId: "spadie-42nd-2026", ruleId: "middle", anchorDate: "2026-06-08" }
+        { eventId: "spadie-42nd-2026", ruleId: "middle", anchorDate: "2026-06-08" },
+        { eventId: "sengoku-autumn-2026", ruleId: "early", anchorDate: "2026-06-24" }
       ];
 
       function getDefaultSentDeliveries() {
         return [
           { eventId: "tpc17-2026", ruleId: "fixed-3d" },
           { eventId: "jopt-tokyo-02-2026", ruleId: "middle", onDate: "2026-06-10" },
+          { eventId: "jopt-tokyo-02-2026", ruleId: "fixed-1m", onDate: "2026-06-16" },
           { eventId: "spadie-osaka-2026-06", onDate: SENT_DAY_2026_06_08 },
           { eventId: "u30-summer-2026", ruleId: "early", onDate: SENT_DAY_2026_06_08 },
           { eventId: "jopt-fukuoka-01-2026", onDate: SENT_DAY_2026_06_08 },
           { eventId: "jopt-fukuoka-01-2026", ruleId: "middle", onDate: "2026-06-13" },
           { eventId: "jopt-fukuoka-01-2026", ruleId: "middle", onDate: "2026-06-24" },
           { eventId: "jopt-fukuoka-01-2026", ruleId: "fixed-1m", onDate: "2026-06-30" },
-          { eventId: "jopt-fukuoka-01-2026", ruleId: "fixed-3w", onDate: "2026-07-09" }
+          { eventId: "jopt-fukuoka-01-2026", ruleId: "fixed-3w", onDate: "2026-07-09" },
+          { eventId: "sengoku-autumn-2026", ruleId: "early", onDate: "2026-06-21" }
         ];
       }
 
@@ -2389,8 +2393,6 @@
             const phaseEnd = resolveOffset(event.startDate, rule.end);
             const assignableStart = maxDate(actualPhaseStart, startDate);
             if (assignableStart > phaseEnd) continue;
-            const daysUntilEvent = diffDays(event.startDate, startDate);
-            const catchUpPhase = assignableStart > actualPhaseStart || daysUntilEvent < 50;
             // 計画開始がフェーズ途中なら、その日から定期グリッドを切り直す（取りこぼし防止）
             let index = 0;
             for (let date = assignableStart; date <= phaseEnd; date = addDays(date, rule.interval)) {
@@ -2398,13 +2400,10 @@
                 index += 1;
                 continue;
               }
-              // 取りこぼしフェーズでは固定日前後の除外を緩め、残り期間の定期募集を確保する
-              if (!catchUpPhase) {
-                const nearBuffer = fixedNearBufferFor(rule);
-                if (isNearFixedDelivery(date, fixedIdeal, nearBuffer)) {
-                  index += 1;
-                  continue;
-                }
+              const nearBuffer = fixedNearBufferFor(rule);
+              if (isNearFixedDelivery(date, fixedIdeal, nearBuffer)) {
+                index += 1;
+                continue;
               }
               candidates.push(createCandidate(event, rule, date, assignableStart, phaseEnd, index));
               index += 1;
@@ -2700,13 +2699,8 @@
         if (isBlackoutForOtherEvent(date, item.event, accountEvents)) failures.push("blackout");
         if (date < item.windowStart || date > item.windowEnd) failures.push("window");
         if (item.rule.kind !== "fixed") {
-          const phaseStart = resolveOffset(item.event.startDate, item.rule.start);
-          const daysUntilEvent = diffDays(item.event.startDate, item.windowStart);
-          const catchUpPhase = item.windowStart > phaseStart || daysUntilEvent < 50;
-          if (!catchUpPhase) {
-            const nearBuffer = fixedNearBufferFor(item.rule);
-            if (isNearFixedDelivery(date, fixedIdealDates(item.event), nearBuffer)) failures.push("fixed-near");
-          }
+          const nearBuffer = fixedNearBufferFor(item.rule);
+          if (isNearFixedDelivery(date, fixedIdealDates(item.event), nearBuffer)) failures.push("fixed-near");
           if (isPeriodicTooClose(date, item, periodicByEvent)) failures.push("periodic-close");
         }
         return failures;
