@@ -2474,16 +2474,31 @@
         return fixedRules.map((rule) => resolveOffset(event.startDate, rule.offset));
       }
 
-      function isDayBeforeFixedDelivery(date, fixedIdeal) {
-        for (const fixedDate of fixedIdeal) {
+      function getEffectiveFixedDates(event) {
+        const dates = new Set(fixedIdealDates(event).map(toInputDate));
+        for (const pin of PINNED_ASSIGNMENTS) {
+          if (pin.eventId !== event.id || !pin.ruleId) continue;
+          if (!fixedRules.some((rule) => rule.id === pin.ruleId)) continue;
+          if (pin.date) dates.add(pin.date);
+        }
+        return [...dates].map(parseInputDate).filter(Boolean);
+      }
+
+      function isPeriodicTooCloseToFixedDelivery(date, event, rule) {
+        if (rule.kind === "fixed") return false;
+        const buffer = rule.interval;
+        for (const fixedDate of getEffectiveFixedDates(event)) {
+          if (sameDate(date, fixedDate)) return true;
           if (sameDate(date, addDays(fixedDate, -1))) return true;
+          const daysAfter = diffDays(date, fixedDate);
+          if (daysAfter > 0 && daysAfter < buffer) return true;
         }
         return false;
       }
 
-      function shouldSkipPeriodicDate(date, fixedIdeal, fixedDates) {
+      function shouldSkipPeriodicDate(date, event, rule, fixedDates) {
         if (fixedDates.has(toInputDate(date))) return true;
-        return isDayBeforeFixedDelivery(date, fixedIdeal);
+        return isPeriodicTooCloseToFixedDelivery(date, event, rule);
       }
 
       function alignToIntervalGrid(phaseStart, assignableStart, interval) {
@@ -2513,7 +2528,7 @@
             let index = 0;
             const gridStart = alignToIntervalGrid(actualPhaseStart, assignableStart, rule.interval);
             for (let date = gridStart; date <= phaseEnd; date = addDays(date, rule.interval)) {
-              if (shouldSkipPeriodicDate(date, fixedIdeal, fixedDates)) {
+              if (shouldSkipPeriodicDate(date, event, rule, fixedDates)) {
                 index += 1;
                 continue;
               }
@@ -2811,7 +2826,7 @@
         if (isBlackoutForOtherEvent(date, item.event, accountEvents)) failures.push("blackout");
         if (date < item.windowStart || date > item.windowEnd) failures.push("window");
         if (item.rule.kind !== "fixed") {
-          if (isDayBeforeFixedDelivery(date, fixedIdealDates(item.event))) failures.push("fixed-near");
+          if (isPeriodicTooCloseToFixedDelivery(date, item.event, item.rule)) failures.push("fixed-near");
           if (isPeriodicTooClose(date, item, periodicByEvent)) failures.push("periodic-close");
         }
         return failures;
