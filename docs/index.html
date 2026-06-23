@@ -3091,25 +3091,35 @@
               const gap = Math.abs(diffDays(curr.assignedDate, prev.assignedDate));
               if (gap >= minGap) continue;
 
+              let mover = curr;
+              if (isRowDateLocked(curr) && !isRowDateLocked(prev)) {
+                mover = prev;
+              } else if (isRowDateLocked(curr) && isRowDateLocked(prev)) {
+                continue;
+              }
+
+              if (isRowDateLocked(mover)) continue;
+
               changed = true;
-              const accountId = curr.event.lineAccount;
+              const accountId = mover.event.lineAccount;
               const occupied = occupiedByAccount[accountId];
               const accountEvents = accountEventsMap[accountId] || [];
-              clearAssignment(curr, occupiedByAccount, globalCountByDate, periodicByEvent);
+              clearAssignment(mover, occupiedByAccount, globalCountByDate, periodicByEvent);
 
-              const result = findAvailableDate(curr, occupied, accountEvents, globalCountByDate, periodicByEvent);
-              if (result && Math.abs(diffDays(result.date, prev.assignedDate)) >= minGap) {
-                curr.assignedDate = result.date;
-                curr.reasons = [...new Set([...(curr.reasons || []), ...result.reasons, "間隔調整"])];
-                curr.priorityEvent = result.priorityEvent || null;
-                curr.status = sameDate(result.date, curr.idealDate) ? "ok" : "adjusted";
-                occupied.set(toInputDate(result.date), curr);
+              const anchor = mover === curr ? prev : curr;
+              const result = findAvailableDate(mover, occupied, accountEvents, globalCountByDate, periodicByEvent);
+              if (result && Math.abs(diffDays(result.date, anchor.assignedDate)) >= minGap) {
+                mover.assignedDate = result.date;
+                mover.reasons = [...new Set([...(mover.reasons || []), ...result.reasons, "間隔調整"])];
+                mover.priorityEvent = result.priorityEvent || null;
+                mover.status = sameDate(result.date, mover.idealDate) ? "ok" : "adjusted";
+                occupied.set(toInputDate(result.date), mover);
                 bumpDayDensity(globalCountByDate, result.date);
-                registerPeriodicAssignment(periodicByEvent, curr.event.id, result.date);
+                registerPeriodicAssignment(periodicByEvent, mover.event.id, result.date);
               } else {
-                curr.status = "blocked";
-                curr.reasons = [...new Set([...(curr.reasons || []), "間隔不足のため未割当"])];
-                curr.priorityEvent = null;
+                mover.status = "blocked";
+                mover.reasons = [...new Set([...(mover.reasons || []), "間隔不足のため未割当"])];
+                mover.priorityEvent = null;
               }
 
               periodicByEvent = rebuildPeriodicByEvent(rows);
