@@ -1610,6 +1610,7 @@
       }
 
       function applyPinnedAssignments(rows) {
+        const usedRowIds = new Set();
         for (const pin of PINNED_ASSIGNMENTS) {
           const target = parseInputDate(pin.date);
           if (!target) continue;
@@ -1617,7 +1618,9 @@
           const rule = rules.find((item) => item.id === pin.ruleId);
           if (!event || !rule) continue;
 
-          let matching = rows.filter((row) => row.event.id === pin.eventId && row.rule.id === pin.ruleId);
+          let matching = rows.filter(
+            (row) => row.event.id === pin.eventId && row.rule.id === pin.ruleId && !usedRowIds.has(row.id)
+          );
           if (!matching.length) {
             const created = createCandidate(event, rule, target, target, target, 0);
             rows.push(created);
@@ -1635,10 +1638,71 @@
           });
 
           const row = matching[0];
+          usedRowIds.add(row.id);
           row.assignedDate = target;
           row.dateLocked = true;
           row.status = sameDate(target, row.idealDate) ? "ok" : "adjusted";
           row.reasons = [...new Set([...(row.reasons || []), "実配信日"])];
+        }
+      }
+
+      function getIntervalGridStart(eventId, ruleId, phaseStart) {
+        const anchor = INTERVAL_ANCHORED_SERIES.find(
+          (item) => item.eventId === eventId && item.ruleId === ruleId
+        );
+        if (anchor) {
+          const anchorDate = parseInputDate(anchor.anchorDate);
+          if (anchorDate) return maxDate(phaseStart, anchorDate);
+        }
+        return phaseStart;
+      }
+
+      function nextIntervalGridDate(eventId, ruleId, phaseStart, fromDate, phaseEnd, interval) {
+        let date = getIntervalGridStart(eventId, ruleId, phaseStart);
+        while (date < fromDate && date <= phaseEnd) {
+          date = addDays(date, interval);
+        }
+        return date <= phaseEnd ? date : null;
+      }
+
+      function enforcePinnedPeriodicSpacing(rows) {
+        for (const pin of PINNED_ASSIGNMENTS) {
+          const rule = rules.find((item) => item.id === pin.ruleId);
+          const event = events.find((item) => item.id === pin.eventId);
+          if (!rule || !event || rule.kind === "fixed") continue;
+
+          const pinDate = parseInputDate(pin.date);
+          if (!pinDate) continue;
+          const minGap = rule.interval;
+          const phaseStart = resolveOffset(event.startDate, rule.start);
+          const phaseEnd = resolveOffset(event.startDate, rule.end);
+
+          for (const row of rows) {
+            if (row.event.id !== pin.eventId || row.rule.id !== pin.ruleId) continue;
+            if (!row.assignedDate || row.status === "sent" || row.dateLocked) continue;
+
+            const gap = Math.abs(diffDays(row.assignedDate, pinDate));
+            if (gap === 0 || gap >= minGap) continue;
+
+            const rescheduled = nextIntervalGridDate(
+              pin.eventId,
+              pin.ruleId,
+              phaseStart,
+              addDays(pinDate, minGap),
+              phaseEnd,
+              minGap
+            );
+            if (rescheduled) {
+              row.assignedDate = rescheduled;
+              row.idealDate = rescheduled;
+              row.status = "adjusted";
+              row.reasons = [...new Set([...(row.reasons || []), "ピン留め配信との間隔確保"])];
+            } else {
+              row.assignedDate = null;
+              row.status = "blocked";
+              row.reasons = [...new Set([...(row.reasons || []), "ピン留め配信との間隔確保"])];
+            }
+          }
         }
       }
 
@@ -2340,6 +2404,7 @@
         applySentDeliveries(latestRows, getSentDeliveries());
         applyIntervalAnchoredSeries(latestRows);
         applyPinnedAssignments(latestRows);
+        enforcePinnedPeriodicSpacing(latestRows);
         finalizePostAssignments(latestRows, selectedEvents);
         rowById.clear();
         for (const row of latestRows) rowById.set(row.id, row);
