@@ -1622,10 +1622,11 @@
           .filter(Boolean);
       }
 
-      function applyPinnedAssignments(rows) {
+      function applyPinnedAssignments(rows, options = {}) {
+        const { forceAll = false } = options;
         const usedRowIds = new Set();
         for (const pin of PINNED_ASSIGNMENTS) {
-          if (hasAnchoredSeries(pin.eventId, pin.ruleId)) continue;
+          if (!forceAll && hasAnchoredSeries(pin.eventId, pin.ruleId)) continue;
           const target = parseInputDate(pin.date);
           if (!target) continue;
           const event = events.find((item) => item.id === pin.eventId);
@@ -2442,6 +2443,7 @@
         applyPinnedAssignments(latestRows);
         enforcePinnedPeriodicSpacing(latestRows);
         finalizePostAssignments(latestRows, selectedEvents);
+        applyPinnedAssignments(latestRows, { forceAll: true });
         rowById.clear();
         for (const row of latestRows) rowById.set(row.id, row);
         updateSimulationBox();
@@ -3159,6 +3161,7 @@
             changed = true;
 
             for (const row of toMove) {
+              if (isRowDateLocked(row)) continue;
               const accountId = row.event.lineAccount;
               const accountEvents = accountEventsMap[accountId] || [];
               clearAssignment(row, occupiedByAccount, globalCountByDate, periodicByEvent);
