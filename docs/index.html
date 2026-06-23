@@ -1562,6 +1562,8 @@
         { eventId: "jopt-fukuoka-01-2026", ruleId: "fixed-3w", date: "2026-06-24" },
         { eventId: "jopt-fukuoka-01-2026", ruleId: "middle", date: "2026-06-12" },
         { eventId: "jopt-fukuoka-01-2026", ruleId: "middle", date: "2026-06-19" },
+        { eventId: "spadie-42nd-2026", ruleId: "middle", date: "2026-06-23" },
+        { eventId: "jopt-sapporo-02-2026", ruleId: "fixed-3m", date: "2026-06-23" },
         { eventId: "sengoku-autumn-2026", ruleId: "fixed-3m", date: "2026-06-17" }
       ];
 
@@ -2336,8 +2338,8 @@
         const selectedEvents = getSelectedEvents();
         latestRows = assignDates(buildCandidates(selectedEvents, startDate), selectedEvents);
         applySentDeliveries(latestRows, getSentDeliveries());
-        applyPinnedAssignments(latestRows);
         applyIntervalAnchoredSeries(latestRows);
+        applyPinnedAssignments(latestRows);
         finalizePostAssignments(latestRows, selectedEvents);
         rowById.clear();
         for (const row of latestRows) rowById.set(row.id, row);
