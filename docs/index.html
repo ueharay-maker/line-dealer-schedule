@@ -1609,9 +1609,22 @@
         );
       }
 
+      function hasAnchoredSeries(eventId, ruleId) {
+        return INTERVAL_ANCHORED_SERIES.some(
+          (anchor) => anchor.eventId === eventId && anchor.ruleId === ruleId
+        );
+      }
+
+      function getPinsForEventRule(eventId, ruleId) {
+        return PINNED_ASSIGNMENTS.filter((pin) => pin.eventId === eventId && pin.ruleId === ruleId)
+          .map((pin) => parseInputDate(pin.date))
+          .filter(Boolean);
+      }
+
       function applyPinnedAssignments(rows) {
         const usedRowIds = new Set();
         for (const pin of PINNED_ASSIGNMENTS) {
+          if (hasAnchoredSeries(pin.eventId, pin.ruleId)) continue;
           const target = parseInputDate(pin.date);
           if (!target) continue;
           const event = events.find((item) => item.id === pin.eventId);
@@ -1665,6 +1678,24 @@
         return date <= phaseEnd ? date : null;
       }
 
+      function findNextOpenGridDate(eventId, ruleId, phaseStart, phaseEnd, interval, fromDate, rows, excludeRowId) {
+        let date = nextIntervalGridDate(eventId, ruleId, phaseStart, fromDate, phaseEnd, interval);
+        while (date) {
+          const conflict = rows.some(
+            (row) =>
+              row.id !== excludeRowId &&
+              row.event.id === eventId &&
+              row.rule.id === ruleId &&
+              row.assignedDate &&
+              row.status !== "sent" &&
+              sameDate(row.assignedDate, date)
+          );
+          if (!conflict) return date;
+          date = nextIntervalGridDate(eventId, ruleId, phaseStart, addDays(date, interval), phaseEnd, interval);
+        }
+        return null;
+      }
+
       function enforcePinnedPeriodicSpacing(rows) {
         for (const pin of PINNED_ASSIGNMENTS) {
           const rule = rules.find((item) => item.id === pin.ruleId);
@@ -1684,13 +1715,15 @@
             const gap = Math.abs(diffDays(row.assignedDate, pinDate));
             if (gap === 0 || gap >= minGap) continue;
 
-            const rescheduled = nextIntervalGridDate(
+            const rescheduled = findNextOpenGridDate(
               pin.eventId,
               pin.ruleId,
               phaseStart,
-              addDays(pinDate, minGap),
               phaseEnd,
-              minGap
+              minGap,
+              addDays(pinDate, minGap),
+              rows,
+              row.id
             );
             if (rescheduled) {
               row.assignedDate = rescheduled;
@@ -1738,6 +1771,7 @@
             slotDates.push(startOfDay(date));
           }
 
+          const pinnedDates = getPinsForEventRule(anchor.eventId, anchor.ruleId);
           const seriesRows = rows.filter((row) => row.event.id === anchor.eventId && row.rule.id === anchor.ruleId);
           const usedIds = new Set();
           const occupiedByAccount = rebuildOccupiedByAccount(rows);
@@ -1747,6 +1781,7 @@
           let prevAssignedDate = null;
 
           slotDates.forEach((slotDate, index) => {
+            const isPinnedSlot = pinnedDates.some((pinDate) => sameDate(pinDate, slotDate));
             const unused = seriesRows.filter((row) => !usedIds.has(row.id));
             let row = unused.sort(
               (a, b) => Math.abs(diffDays(slotDate, a.idealDate)) - Math.abs(diffDays(slotDate, b.idealDate))
@@ -1762,20 +1797,20 @@
             row.windowStart = windowStart;
             row.windowEnd = phaseEnd;
             const placedDate =
-              index === 0
+              isPinnedSlot || index === 0
                 ? slotDate
                 : findAnchorSeriesSlotDate(slotDate, row, occupied, accountEvents, prevAssignedDate, rule);
 
             usedIds.add(row.id);
             row.idealDate = slotDate;
             row.assignedDate = placedDate;
-            row.dateLocked = index === 0;
+            row.dateLocked = isPinnedSlot || index === 0;
             row.anchorSeries = true;
             row.status = sameDate(placedDate, slotDate) ? "ok" : "adjusted";
             row.reasons = [
               ...new Set([
                 ...(row.reasons || []),
-                index === 0 ? "実配信日" : "配信間隔",
+                isPinnedSlot || index === 0 ? "実配信日" : "配信間隔",
                 ...(sameDate(placedDate, slotDate) ? [] : ["東京LINE重複回避"])
               ])
             ];
