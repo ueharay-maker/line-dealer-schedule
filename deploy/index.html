@@ -1570,7 +1570,8 @@
 
       const INTERVAL_ANCHORED_SERIES = [
         { eventId: "spadie-42nd-2026", ruleId: "middle", anchorDate: "2026-06-08" },
-        { eventId: "sengoku-autumn-2026", ruleId: "early", anchorDate: "2026-06-24" }
+        { eventId: "sengoku-autumn-2026", ruleId: "early", anchorDate: "2026-06-24" },
+        { eventId: "jopt-sapporo-02-2026", ruleId: "early", anchorDate: "2026-06-30" }
       ];
 
       function getDefaultSentDeliveries() {
@@ -1736,6 +1737,51 @@
               row.assignedDate = null;
               row.status = "blocked";
               row.reasons = [...new Set([...(row.reasons || []), "ピン留め配信との間隔確保"])];
+            }
+          }
+        }
+      }
+
+      function enforcePostFixedPeriodicSpacing(rows) {
+        for (const event of events) {
+          const fixedDates = getEffectiveFixedDates(event);
+          if (!fixedDates.length) continue;
+
+          for (const rule of intervalRules) {
+            const buffer = rule.interval;
+            const phaseStart = resolveOffset(event.startDate, rule.start);
+            const phaseEnd = resolveOffset(event.startDate, rule.end);
+
+            for (const row of rows) {
+              if (row.event.id !== event.id || row.rule.id !== rule.id) continue;
+              if (!row.assignedDate || row.status === "sent" || row.dateLocked) continue;
+
+              for (const fixedDate of fixedDates) {
+                const daysAfter = diffDays(row.assignedDate, fixedDate);
+                if (daysAfter <= 0 || daysAfter >= buffer) continue;
+
+                const rescheduled = findNextOpenGridDate(
+                  event.id,
+                  rule.id,
+                  phaseStart,
+                  phaseEnd,
+                  buffer,
+                  addDays(fixedDate, buffer),
+                  rows,
+                  row.id
+                );
+                if (rescheduled) {
+                  row.assignedDate = rescheduled;
+                  row.idealDate = rescheduled;
+                  row.status = "adjusted";
+                  row.reasons = [...new Set([...(row.reasons || []), "固定配信後の間隔確保"])];
+                } else {
+                  row.assignedDate = null;
+                  row.status = "blocked";
+                  row.reasons = [...new Set([...(row.reasons || []), "固定配信後の間隔確保"])];
+                }
+                break;
+              }
             }
           }
         }
@@ -2443,6 +2489,7 @@
         applyPinnedAssignments(latestRows);
         enforcePinnedPeriodicSpacing(latestRows);
         finalizePostAssignments(latestRows, selectedEvents);
+        enforcePostFixedPeriodicSpacing(latestRows);
         applyPinnedAssignments(latestRows, { forceAll: true });
         rowById.clear();
         for (const row of latestRows) rowById.set(row.id, row);
