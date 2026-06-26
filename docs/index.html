@@ -1804,9 +1804,27 @@
             options.push({ date: candidate, distance: Math.abs(offset) });
           }
         }
-        if (!options.length) return slotDate;
-        options.sort((a, b) => a.distance - b.distance);
-        return options[0].date;
+        if (options.length) {
+          options.sort((a, b) => a.distance - b.distance);
+          return options[0].date;
+        }
+
+        if (prevAssignedDate) {
+          let candidate = maxDate(slotDate, addDays(prevAssignedDate, minGap));
+          for (let attempt = 0; attempt <= 14; attempt += 1) {
+            if (candidate > item.windowEnd) return null;
+            if (
+              Math.abs(diffDays(candidate, prevAssignedDate)) >= minGap &&
+              canPlace(candidate, item, occupied, accountEvents, {})
+            ) {
+              return candidate;
+            }
+            candidate = addDays(candidate, 1);
+          }
+          return null;
+        }
+
+        return canPlace(slotDate, item, occupied, accountEvents, {}) ? slotDate : null;
       }
 
       function applyIntervalAnchoredSeries(rows) {
@@ -1855,6 +1873,12 @@
 
             usedIds.add(row.id);
             row.idealDate = slotDate;
+            if (!placedDate) {
+              row.assignedDate = null;
+              row.status = "blocked";
+              row.reasons = [...new Set([...(row.reasons || []), "間隔不足のため未割当"])];
+              return;
+            }
             row.assignedDate = placedDate;
             row.dateLocked = isPinnedSlot || index === 0;
             row.anchorSeries = true;
