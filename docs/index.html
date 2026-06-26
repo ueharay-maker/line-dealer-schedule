@@ -1629,11 +1629,9 @@
           .filter(Boolean);
       }
 
-      function applyPinnedAssignments(rows, options = {}) {
-        const { forceAll = false } = options;
+      function applyPinnedAssignments(rows) {
         const usedRowIds = new Set();
         for (const pin of PINNED_ASSIGNMENTS) {
-          if (!forceAll && hasAnchoredSeries(pin.eventId, pin.ruleId)) continue;
           const target = parseInputDate(pin.date);
           if (!target) continue;
           const event = events.find((item) => item.id === pin.eventId);
@@ -1644,7 +1642,16 @@
             (row) => row.event.id === pin.eventId && row.rule.id === pin.ruleId && !usedRowIds.has(row.id)
           );
           if (!matching.length) {
-            const created = createCandidate(event, rule, target, target, target, 0);
+            const phaseStart = rule.kind === "interval" ? resolveOffset(event.startDate, rule.start) : target;
+            const phaseEnd = rule.kind === "interval" ? resolveOffset(event.startDate, rule.end) : target;
+            const created = createCandidate(
+              event,
+              rule,
+              target,
+              maxDate(phaseStart, target),
+              phaseEnd,
+              0
+            );
             rows.push(created);
             matching = [created];
           }
@@ -1661,9 +1668,25 @@
 
           const row = matching[0];
           usedRowIds.add(row.id);
+          const accountId = event.lineAccount;
+          for (const other of rows) {
+            if (
+              other.id === row.id ||
+              !other.assignedDate ||
+              other.event.lineAccount !== accountId ||
+              !sameDate(other.assignedDate, target) ||
+              isRowDateLocked(other)
+            ) {
+              continue;
+            }
+            other.assignedDate = null;
+            other.status = "blocked";
+            other.reasons = [...new Set([...(other.reasons || []), "実配信日優先"])];
+          }
           row.assignedDate = target;
+          row.idealDate = target;
           row.dateLocked = true;
-          row.status = sameDate(target, row.idealDate) ? "ok" : "adjusted";
+          row.status = "ok";
           row.reasons = [...new Set([...(row.reasons || []), "実配信日"])];
         }
       }
@@ -1868,6 +1891,16 @@
 
             row.windowStart = windowStart;
             row.windowEnd = phaseEnd;
+            if (isPinnedSlot || index === 0) {
+              const key = toInputDate(slotDate);
+              const incumbent = occupied.get(key);
+              if (incumbent && incumbent.id !== row.id && !isRowDateLocked(incumbent)) {
+                incumbent.assignedDate = null;
+                incumbent.status = "blocked";
+                incumbent.reasons = [...new Set([...(incumbent.reasons || []), "実配信日優先"])];
+                occupied.delete(key);
+              }
+            }
             const placedDate =
               isPinnedSlot || index === 0
                 ? slotDate
@@ -2515,12 +2548,12 @@
         const selectedEvents = getSelectedEvents();
         latestRows = assignDates(buildCandidates(selectedEvents, startDate), selectedEvents);
         applySentDeliveries(latestRows, getSentDeliveries());
-        applyIntervalAnchoredSeries(latestRows);
         applyPinnedAssignments(latestRows);
+        applyIntervalAnchoredSeries(latestRows);
         enforcePinnedPeriodicSpacing(latestRows);
         finalizePostAssignments(latestRows, selectedEvents);
         enforcePostFixedPeriodicSpacing(latestRows);
-        applyPinnedAssignments(latestRows, { forceAll: true });
+        applyPinnedAssignments(latestRows);
         rowById.clear();
         for (const row of latestRows) rowById.set(row.id, row);
         updateSimulationBox();
@@ -3054,6 +3087,8 @@
             if (Math.abs(diffDays(curr.assignedDate, prev.assignedDate)) !== 1) continue;
             // 固定配信同士の連続は許可（例: 6/16 JOPT 遠征補助 + 6/17 戦国 一次募集）
             if (prev.rule.kind === "fixed" && curr.rule.kind === "fixed") continue;
+            // 実配信日ピン留めは連続OK（例: 7/21 戦国 遠征補助 + 7/22 JOPT #03 早期募集）
+            if (isRowDateLocked(prev) || isRowDateLocked(curr)) continue;
             return true;
           }
         }
@@ -3101,6 +3136,7 @@
               const curr = accountRows[index];
               if (Math.abs(diffDays(curr.assignedDate, prev.assignedDate)) !== 1) continue;
               if (prev.rule.kind === "fixed" && curr.rule.kind === "fixed") continue;
+              if (isRowDateLocked(prev) || isRowDateLocked(curr)) continue;
 
               const mover =
                 isRowDateLocked(prev) || prev.anchorSeries
