@@ -2967,7 +2967,7 @@
       }
 
       function clearAssignment(row, occupiedByAccount, globalCountByDate, periodicByEvent) {
-        if (!row.assignedDate) return;
+        if (!row.assignedDate || isRowDateLocked(row)) return;
         const accountId = row.event.lineAccount;
         const key = toInputDate(row.assignedDate);
         occupiedByAccount[accountId].delete(key);
