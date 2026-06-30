@@ -1566,6 +1566,8 @@
         { eventId: "spadie-42nd-2026", ruleId: "middle", date: "2026-06-23" },
         { eventId: "jopt-sapporo-02-2026", ruleId: "fixed-3m", date: "2026-06-26" },
         { eventId: "sengoku-autumn-2026", ruleId: "fixed-3m", date: "2026-06-17" },
+        { eventId: "sengoku-autumn-2026", ruleId: "early", date: "2026-06-24" },
+        { eventId: "sengoku-autumn-2026", ruleId: "early", date: "2026-07-12" },
         { eventId: "sengoku-autumn-2026", ruleId: "fixed-1m", date: "2026-07-21" },
         { eventId: "jopt-sapporo-02-2026", ruleId: "fixed-1m", date: "2026-07-21" },
         { eventId: "sengoku-autumn-2026", ruleId: "fixed-3w", date: "2026-08-16" },
@@ -1575,7 +1577,6 @@
 
       const INTERVAL_ANCHORED_SERIES = [
         { eventId: "spadie-42nd-2026", ruleId: "middle", anchorDate: "2026-06-08" },
-        { eventId: "sengoku-autumn-2026", ruleId: "early", anchorDate: "2026-06-24" },
         { eventId: "jopt-sapporo-02-2026", ruleId: "early", anchorDate: "2026-07-03" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "early", anchorDate: "2026-07-22" }
       ];
@@ -1938,6 +1939,280 @@
         }
       }
 
+      function canPlaceForGapFill(date, item, occupied, accountEvents, periodicByEvent = {}) {
+        const failures = diagnosePlacement(date, item, occupied, accountEvents, periodicByEvent);
+        return failures.filter((failure) => failure !== "consecutive" && failure !== "periodic-close").length === 0;
+      }
+
+      function displaceUnlockedAccountIncumbent(date, row, occupiedByAccount, globalCountByDate, periodicByEvent) {
+        const accountId = row.event.lineAccount;
+        const key = toInputDate(date);
+        const incumbent = occupiedByAccount[accountId].get(key);
+        if (
+          !incumbent ||
+          incumbent.id === row.id ||
+          incumbent.event.id !== row.event.id ||
+          isRowDateLocked(incumbent) ||
+          incumbent.rule.kind === "fixed" ||
+          !incumbent.assignedDate
+        ) {
+          return;
+        }
+        dropDayDensity(globalCountByDate, incumbent.assignedDate);
+        unregisterPeriodicAssignment(periodicByEvent, incumbent.event.id, incumbent.assignedDate);
+        occupiedByAccount[accountId].delete(key);
+        incumbent.assignedDate = null;
+        incumbent.status = "blocked";
+        incumbent.reasons = [...new Set([...(incumbent.reasons || []), "定期間隔優先"])];
+      }
+
+      function ruleForGapCursor(event, cursor) {
+        for (const rule of intervalRules) {
+          const phaseStart = resolveOffset(event.startDate, rule.start);
+          const phaseEnd = resolveOffset(event.startDate, rule.end);
+          if (cursor >= phaseStart && cursor <= phaseEnd) return rule;
+        }
+        return null;
+      }
+
+      function findGapFillPlacement(item, occupiedByAccount, accountId, accountEvents, globalCountByDate, periodicByEvent) {
+        const occupied = occupiedByAccount[accountId];
+        const maxDistance = Math.max(item.rule.interval + 7, 21);
+        const options = [];
+        for (let distance = 0; distance <= maxDistance; distance += 1) {
+          const offsets = distance === 0 ? [0] : [-distance, distance];
+          for (const offset of offsets) {
+            const candidate = addDays(item.idealDate, offset);
+            if (candidate < item.windowStart || candidate > item.windowEnd) continue;
+            displaceUnlockedAccountIncumbent(
+              candidate,
+              item,
+              occupiedByAccount,
+              globalCountByDate,
+              periodicByEvent
+            );
+            if (!canPlaceForGapFill(candidate, item, occupied, accountEvents, periodicByEvent)) continue;
+            if (wouldExceedDensity(globalCountByDate, candidate)) continue;
+            options.push({ date: candidate, distance: Math.abs(offset) });
+          }
+        }
+        if (!options.length) return null;
+        options.sort((a, b) => a.distance - b.distance);
+        return options[0].date;
+      }
+
+      function fillPeriodicScheduleGaps(rows, selectedEvents, scheduleStart) {
+        const accountEventsMap = eventsByAccount(selectedEvents);
+        let occupiedByAccount = rebuildOccupiedByAccount(rows);
+        let globalCountByDate = rebuildGlobalCountByDate(rows);
+        let periodicByEvent = rebuildPeriodicByEvent(rows);
+
+        for (const event of selectedEvents) {
+          const fixedDates = new Set(getEffectiveFixedDates(event).map(toInputDate));
+
+          for (const rule of intervalRules) {
+            const phaseStart = resolveOffset(event.startDate, rule.start);
+            const phaseEnd = resolveOffset(event.startDate, rule.end);
+            const assignableStart = maxDate(phaseStart, scheduleStart);
+            if (assignableStart > phaseEnd) continue;
+
+            const gridStart = getIntervalGridStart(event.id, rule.id, phaseStart);
+            const effectiveStart = maxDate(gridStart, assignableStart);
+
+            for (let slot = effectiveStart; slot <= phaseEnd; slot = addDays(slot, rule.interval)) {
+              if (shouldSkipPeriodicDate(slot, event, rule, fixedDates)) continue;
+
+              const alreadyOnSlot = rows.some(
+                (row) =>
+                  row.event.id === event.id &&
+                  row.rule.id === rule.id &&
+                  row.assignedDate &&
+                  row.status !== "sent" &&
+                  sameDate(row.assignedDate, slot)
+              );
+              if (alreadyOnSlot) continue;
+
+              const sameRuleTooClose = rows.some(
+                (row) =>
+                  row.event.id === event.id &&
+                  row.rule.id === rule.id &&
+                  row.assignedDate &&
+                  row.status !== "sent" &&
+                  Math.abs(diffDays(row.assignedDate, slot)) < rule.interval
+              );
+              if (sameRuleTooClose) continue;
+
+              let row = rows.find(
+                (candidate) =>
+                  candidate.event.id === event.id &&
+                  candidate.rule.id === rule.id &&
+                  !candidate.assignedDate &&
+                  candidate.status !== "sent" &&
+                  sameDate(candidate.idealDate, slot)
+              );
+              if (!row) {
+                row = rows.find(
+                  (candidate) =>
+                    candidate.event.id === event.id &&
+                    candidate.rule.id === rule.id &&
+                    !candidate.assignedDate &&
+                    candidate.status !== "sent"
+                );
+              }
+              if (!row) {
+                row = createCandidate(event, rule, slot, phaseStart, phaseEnd, 0);
+                rows.push(row);
+              }
+              if (isRowDateLocked(row)) continue;
+
+              row.idealDate = slot;
+              row.windowStart = phaseStart;
+              row.windowEnd = phaseEnd;
+
+              const accountId = event.lineAccount;
+              displaceUnlockedAccountIncumbent(
+                slot,
+                row,
+                occupiedByAccount,
+                globalCountByDate,
+                periodicByEvent
+              );
+              let placedDate =
+                canPlaceForGapFill(
+                  slot,
+                  row,
+                  occupiedByAccount[accountId],
+                  accountEventsMap[accountId] || [],
+                  periodicByEvent
+                ) && !wouldExceedDensity(globalCountByDate, slot)
+                  ? slot
+                  : findGapFillPlacement(
+                      row,
+                      occupiedByAccount,
+                      accountId,
+                      accountEventsMap[accountId] || [],
+                      globalCountByDate,
+                      periodicByEvent
+                    );
+              if (!placedDate || placedDate < phaseStart || placedDate > phaseEnd) continue;
+
+              row.assignedDate = placedDate;
+              row.reasons = [
+                ...new Set([
+                  ...(row.reasons || []),
+                  sameDate(placedDate, slot) ? "定期間隔" : `${diffDays(placedDate, slot) > 0 ? "+" : ""}${diffDays(placedDate, slot)}日調整`,
+                  "定期間隔"
+                ])
+              ];
+              row.priorityEvent = null;
+              row.status = sameDate(placedDate, slot) ? "ok" : "adjusted";
+              occupiedByAccount[accountId].set(toInputDate(placedDate), row);
+              bumpDayDensity(globalCountByDate, placedDate);
+              registerPeriodicAssignment(periodicByEvent, event.id, placedDate);
+            }
+          }
+        }
+      }
+
+      function fillEventPeriodicContinuity(rows, selectedEvents, scheduleStart) {
+        const accountEventsMap = eventsByAccount(selectedEvents);
+        let occupiedByAccount = rebuildOccupiedByAccount(rows);
+        let globalCountByDate = rebuildGlobalCountByDate(rows);
+        let periodicByEvent = rebuildPeriodicByEvent(rows);
+
+        for (const event of selectedEvents) {
+          const fixedDates = new Set(getEffectiveFixedDates(event).map(toInputDate));
+          const timeline = rows
+            .filter((row) => row.event.id === event.id && row.assignedDate && row.status !== "sent")
+            .sort((a, b) => a.assignedDate - b.assignedDate);
+
+          for (let index = 0; index < timeline.length - 1; index += 1) {
+            const current = timeline[index];
+            const next = timeline[index + 1];
+            if (!current?.assignedDate || !next?.assignedDate) continue;
+            if (current.rule.kind === "fixed" && next.rule.kind === "fixed") continue;
+
+            const minGap = eventPeriodicMinGap(current.rule, next.rule);
+            let cursor = addDays(current.assignedDate, minGap);
+            while (cursor < next.assignedDate && diffDays(next.assignedDate, cursor) >= minGap) {
+              const activeRule = ruleForGapCursor(event, cursor) || current.rule;
+              if (activeRule.kind === "fixed") break;
+
+              const phaseStart = resolveOffset(event.startDate, activeRule.start);
+              const phaseEnd = resolveOffset(event.startDate, activeRule.end);
+              if (cursor < phaseStart || cursor > phaseEnd || cursor < scheduleStart) {
+                cursor = addDays(cursor, 1);
+                continue;
+              }
+              if (shouldSkipPeriodicDate(cursor, event, activeRule, fixedDates)) {
+                cursor = addDays(cursor, 1);
+                continue;
+              }
+
+              let row = rows.find(
+                (candidate) =>
+                  candidate.event.id === event.id &&
+                  candidate.rule.id === activeRule.id &&
+                  !candidate.assignedDate &&
+                  candidate.status !== "sent"
+              );
+              if (!row) {
+                row = createCandidate(event, activeRule, cursor, phaseStart, phaseEnd, 0);
+                rows.push(row);
+              }
+              if (isRowDateLocked(row)) break;
+
+              row.idealDate = cursor;
+              row.windowStart = phaseStart;
+              row.windowEnd = phaseEnd;
+
+              const accountId = event.lineAccount;
+              displaceUnlockedAccountIncumbent(
+                cursor,
+                row,
+                occupiedByAccount,
+                globalCountByDate,
+                periodicByEvent
+              );
+              let placedDate =
+                canPlaceForGapFill(
+                  cursor,
+                  row,
+                  occupiedByAccount[accountId],
+                  accountEventsMap[accountId] || [],
+                  periodicByEvent
+                ) && !wouldExceedDensity(globalCountByDate, cursor)
+                  ? cursor
+                  : findGapFillPlacement(
+                      row,
+                      occupiedByAccount,
+                      accountId,
+                      accountEventsMap[accountId] || [],
+                      globalCountByDate,
+                      periodicByEvent
+                    );
+              if (
+                !placedDate ||
+                placedDate >= next.assignedDate ||
+                Math.abs(diffDays(placedDate, current.assignedDate)) < minGap
+              ) {
+                cursor = addDays(cursor, 1);
+                continue;
+              }
+
+              row.assignedDate = placedDate;
+              row.status = sameDate(placedDate, cursor) ? "ok" : "adjusted";
+              row.reasons = [...new Set([...(row.reasons || []), "定期間隔"])];
+              occupiedByAccount[accountId].set(toInputDate(placedDate), row);
+              bumpDayDensity(globalCountByDate, placedDate);
+              registerPeriodicAssignment(periodicByEvent, event.id, placedDate);
+              timeline.splice(index + 1, 0, row);
+              cursor = addDays(placedDate, minGap);
+            }
+          }
+        }
+      }
+
       const CARD_PHASE_LABELS = {
         "fixed-3m": "一次募集開始",
         "fixed-1m": "遠征補助開始",
@@ -2005,7 +2280,7 @@
           windowLabel: "2か月前〜1か月前",
           start: { unit: "months", value: -2 },
           end: { unit: "months", value: -1 },
-          interval: 5
+          interval: 6
         },
         {
           id: "late",
@@ -2550,10 +2825,12 @@
         applySentDeliveries(latestRows, getSentDeliveries());
         applyPinnedAssignments(latestRows);
         applyIntervalAnchoredSeries(latestRows);
+        fillPeriodicScheduleGaps(latestRows, selectedEvents, startDate);
         enforcePinnedPeriodicSpacing(latestRows);
-        finalizePostAssignments(latestRows, selectedEvents);
         enforcePostFixedPeriodicSpacing(latestRows);
         applyPinnedAssignments(latestRows);
+        finalizePostAssignments(latestRows, selectedEvents);
+        fillPeriodicScheduleGaps(latestRows, selectedEvents, startDate);
         rowById.clear();
         for (const row of latestRows) rowById.set(row.id, row);
         updateSimulationBox();
