@@ -1558,13 +1558,14 @@
         { eventId: "jopt-tokyo-02-2026", ruleId: "middle", date: "2026-06-08" },
         { eventId: "jopt-tokyo-02-2026", ruleId: "fixed-1m", date: "2026-06-20" },
         { eventId: "jopt-tokyo-02-2026", ruleId: "late", date: "2026-06-26" },
-        { eventId: "jopt-tokyo-02-2026", ruleId: "fixed-3w", date: "2026-07-03" },
+        { eventId: "jopt-tokyo-02-2026", ruleId: "fixed-3w", date: "2026-07-02" },
         { eventId: "u30-summer-2026", ruleId: "early", date: "2026-06-09" },
         { eventId: "u30-summer-2026", ruleId: "middle", date: "2026-06-30" },
         { eventId: "jopt-fukuoka-01-2026", ruleId: "fixed-3w", date: "2026-06-24" },
         { eventId: "jopt-fukuoka-01-2026", ruleId: "middle", date: "2026-06-12" },
         { eventId: "jopt-fukuoka-01-2026", ruleId: "middle", date: "2026-06-19" },
         { eventId: "spadie-42nd-2026", ruleId: "middle", date: "2026-06-23" },
+        { eventId: "spadie-42nd-2026", ruleId: "middle", date: "2026-07-03" },
         { eventId: "jopt-sapporo-02-2026", ruleId: "fixed-3m", date: "2026-06-26" },
         { eventId: "sengoku-autumn-2026", ruleId: "fixed-3m", date: "2026-06-17" },
         { eventId: "sengoku-autumn-2026", ruleId: "early", date: "2026-06-24" },
@@ -2235,7 +2236,7 @@
 
       const events = [
         { id: "spadie-osaka-2026-06", name: "SPADIE Osaka", tag: "SPADIE大阪", series: "SPADIE OSAKA", lineAccount: "osaka", start: "2026-06-11", end: "2026-06-14", color: "#ef4444" },
-        { id: "jopt-tokyo-02-2026", name: "JOPT Tokyo #02", tag: "JOPT東京", series: "JOPT Tokyo", lineAccount: "tokyo", start: "2026-07-16", end: "2026-07-19", color: "#3b82f6", recruitment: { target: 80, applied: 45 } },
+        { id: "jopt-tokyo-02-2026", name: "JOPT Tokyo #02", tag: "JOPT東京", series: "JOPT Tokyo", lineAccount: "tokyo", start: "2026-07-16", end: "2026-07-19", color: "#3b82f6", recruitment: { target: 80, applied: 45 }, ruleLabels: { "fixed-3w": "遠征補助締切" } },
         { id: "jopt-fukuoka-01-2026", name: "JOPT Fukuoka #01", tag: "JOPT福岡", series: "JOPT Fukuoka", lineAccount: "fukuoka", start: "2026-07-30", end: "2026-08-02", color: "#14b8a6" },
         { id: "spadie-42nd-2026", name: "SPADIE 42nd", tag: "SPADIE", series: "SPADIE", lineAccount: "tokyo", start: "2026-08-07", end: "2026-08-16", color: "#a855f7", recruitment: { target: 60, applied: 28 } },
         { id: "u30-summer-2026", name: "U-30 夏", tag: "U-30", series: "U-30", lineAccount: "tokyo", start: "2026-08-21", end: "2026-08-23", color: "#22c55e", skipFixedRules: ["fixed-1m", "fixed-3w"] },
@@ -2678,7 +2679,7 @@
         elements.upcomingList.innerHTML = rows
           .map((row) => {
             const meta = getDeliveryMeta(row.id);
-            const phase = cardPhaseLabel(row.rule);
+            const phase = phaseLabelFor(row);
             const kindLabel = row.rule.kind === "fixed" ? "固定" : "定期";
             return `
               <tr class="${meta.reserved ? "row-reserved" : ""}" data-row-id="${row.id}">
@@ -3002,7 +3003,7 @@
           idealDate,
           windowStart,
           windowEnd,
-          topic: topicFor(rule),
+          topic: topicForEventRule(event, rule),
           assignedDate: null,
           status: "unassigned",
           reasons: [],
@@ -3691,7 +3692,7 @@
       function openDetailModal(row) {
         if (!row) return;
         elements.modalTitle.textContent = row.event.name;
-        elements.modalSub.textContent = row.rule.kind === "fixed" ? `${row.rule.name} · ${row.topic}` : row.rule.name;
+        elements.modalSub.textContent = row.rule.kind === "fixed" ? `${phaseLabelFor(row)} · ${row.topic}` : phaseLabelFor(row);
         const topicLine = row.rule.kind === "fixed" ? `<p class="muted" style="margin:6px 0 0">${escapeHtml(row.topic)}</p>` : "";
         elements.modalBody.innerHTML = `
           <div class="detail-grid">
@@ -3701,7 +3702,7 @@
             </div>
             <div class="detail-block">
               <p class="detail-label">配信情報</p>
-              <p class="detail-value" style="font-size:13px">${escapeHtml(row.event.account.name)} / ${escapeHtml(row.rule.name)} / ${row.rule.kind === "fixed" ? "固定" : "定期"}</p>
+              <p class="detail-value" style="font-size:13px">${escapeHtml(row.event.account.name)} / ${escapeHtml(phaseLabelFor(row))} / ${row.rule.kind === "fixed" ? "固定" : "定期"}</p>
               ${topicLine}
             </div>
           </div>
@@ -3719,8 +3720,22 @@
         return CARD_PHASE_LABELS[rule.id] || rule.name;
       }
 
+      function ruleLabelFor(event, rule) {
+        return event.ruleLabels?.[rule.id] || rule.name;
+      }
+
+      function topicForEventRule(event, rule) {
+        if (rule.kind !== "fixed") return "";
+        return event.ruleLabels?.[rule.id] || rule.theme;
+      }
+
+      function phaseLabelFor(row) {
+        if (row.rule.kind === "fixed") return ruleLabelFor(row.event, row.rule);
+        return cardPhaseLabel(row.rule);
+      }
+
       function cardTooltip(row) {
-        const phase = row.rule.kind === "fixed" ? row.rule.name : cardPhaseLabel(row.rule);
+        const phase = phaseLabelFor(row);
         return `${row.event.name} / ${phase} / ${cardMetaLine(row)}`;
       }
 
@@ -3733,7 +3748,7 @@
                 <span class="send-dot"></span>
                 <p class="send-title">${escapeHtml(row.event.name)}</p>
               </div>
-              <p class="send-phase">${escapeHtml(cardPhaseLabel(row.rule))}</p>
+              <p class="send-phase">${escapeHtml(phaseLabelFor(row))}</p>
             </div>
             <p class="send-meta">${cardMetaLine(row)}</p>
           </div>
@@ -3818,7 +3833,7 @@
             シリーズ: row.event.series,
             開催日: `${formatDate(row.event.startDate)}〜${formatDate(row.event.endDate)}`,
             イベントまで: row.assignedDate ? `${diffDays(row.event.startDate, row.assignedDate)}日前` : "",
-            フェーズ: row.rule.name,
+            フェーズ: phaseLabelFor(row),
             種別: row.rule.kind === "fixed" ? "固定配信" : "定期募集",
             配信テーマ: row.rule.kind === "fixed" ? row.topic : ""
           }));
