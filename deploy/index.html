@@ -1533,7 +1533,7 @@
     </div>
 
     <script>
-      const STORAGE_KEY = "line-dealer-schedule-v4";
+      const STORAGE_KEY = "line-dealer-schedule-v5";
       const SETTINGS_UNLOCK_STORAGE_KEY = "line-dealer-settings-unlocked";
       const SETTINGS_UNLOCK_TTL_MS = 12 * 60 * 60 * 1000;
       const SETTINGS_LOCK_DIGEST = "9e8279f3f4fb32456baf3cab98857e6e43cb25a1573041255c9b7bf014d0a399";
@@ -2869,18 +2869,21 @@
         return fixedRules.filter((rule) => !skip.has(rule.id));
       }
 
+      function getPinnedFixedDate(eventId, ruleId) {
+        const pin = PINNED_ASSIGNMENTS.find((item) => item.eventId === eventId && item.ruleId === ruleId);
+        return pin ? parseInputDate(pin.date) : null;
+      }
+
+      function fixedIdealDateFor(event, rule) {
+        return getPinnedFixedDate(event.id, rule.id) || resolveOffset(event.startDate, rule.offset);
+      }
+
       function fixedIdealDates(event) {
-        return eventFixedRules(event).map((rule) => resolveOffset(event.startDate, rule.offset));
+        return eventFixedRules(event).map((rule) => fixedIdealDateFor(event, rule));
       }
 
       function getEffectiveFixedDates(event) {
-        const dates = new Set(fixedIdealDates(event).map(toInputDate));
-        for (const pin of PINNED_ASSIGNMENTS) {
-          if (pin.eventId !== event.id || !pin.ruleId) continue;
-          if (!fixedRules.some((rule) => rule.id === pin.ruleId)) continue;
-          if (pin.date) dates.add(pin.date);
-        }
-        return [...dates].map(parseInputDate).filter(Boolean);
+        return fixedIdealDates(event);
       }
 
       function isPeriodicTooCloseToFixedDelivery(date, event, rule) {
@@ -2915,7 +2918,7 @@
           const fixedDates = new Set(fixedIdeal.map(toInputDate));
 
           for (const rule of eventFixedRules(event)) {
-            const ideal = resolveOffset(event.startDate, rule.offset);
+            const ideal = fixedIdealDateFor(event, rule);
             candidates.push(createCandidate(event, rule, ideal, ideal, ideal, 0));
           }
 
