@@ -3752,6 +3752,59 @@
         return `${row.event.name} / ${phase} / ${cardMetaLine(row)}`;
       }
 
+      function shouldMergeDisplayRows(a, b) {
+        return (
+          a.event.id === b.event.id &&
+          a.assignedDate &&
+          b.assignedDate &&
+          sameDate(a.assignedDate, b.assignedDate) &&
+          a.rule.kind === "fixed" &&
+          b.rule.kind === "fixed"
+        );
+      }
+
+      function groupRowsForDisplay(dayRows) {
+        const groups = [];
+        const used = new Set();
+        const sorted = [...dayRows].sort((a, b) => {
+          const rank = b.rule.rank - a.rule.rank;
+          if (rank) return rank;
+          return a.rule.id.localeCompare(b.rule.id);
+        });
+
+        for (const row of sorted) {
+          if (used.has(row.id)) continue;
+          const group = [row];
+          used.add(row.id);
+          for (const other of sorted) {
+            if (used.has(other.id)) continue;
+            if (shouldMergeDisplayRows(row, other)) {
+              group.push(other);
+              used.add(other.id);
+            }
+          }
+          group.sort((a, b) => b.rule.rank - a.rule.rank);
+          groups.push(group);
+        }
+
+        return groups;
+      }
+
+      function phaseLabelForGroup(rows) {
+        return rows.map((row) => phaseLabelFor(row)).join(" / ");
+      }
+
+      function groupTooltip(rows) {
+        const primary = rows[0];
+        return `${primary.event.name} / ${phaseLabelForGroup(rows)} / ${cardMetaLine(primary)}`;
+      }
+
+      function groupStatus(rows) {
+        if (rows.some((row) => row.status === "blocked")) return "blocked";
+        if (rows.some((row) => row.status === "adjusted")) return "adjusted";
+        return rows[0].status;
+      }
+
       function renderSendCard(row, compact) {
         return `
           <div class="send-card ${row.status}${compact ? " compact" : ""}" data-row-id="${row.id}" style="--event-color: ${row.event.color}" title="${escapeHtml(cardTooltip(row))}">
@@ -3764,6 +3817,28 @@
               <p class="send-phase">${escapeHtml(phaseLabelFor(row))}</p>
             </div>
             <p class="send-meta">${cardMetaLine(row)}</p>
+          </div>
+        `;
+      }
+
+      function renderSendCardGroup(rows, compact) {
+        if (rows.length === 1) return renderSendCard(rows[0], compact);
+
+        const primary = rows[0];
+        const phase = phaseLabelForGroup(rows);
+        const status = groupStatus(rows);
+
+        return `
+          <div class="send-card ${status}${compact ? " compact" : ""}" data-row-id="${primary.id}" style="--event-color: ${primary.event.color}" title="${escapeHtml(groupTooltip(rows))}">
+            <p class="send-account">${escapeHtml(primary.event.account.shortName)}</p>
+            <div class="send-card-header">
+              <div class="send-line">
+                <span class="send-dot"></span>
+                <p class="send-title">${escapeHtml(primary.event.name)}</p>
+              </div>
+              <p class="send-phase">${escapeHtml(phase)}</p>
+            </div>
+            <p class="send-meta">${cardMetaLine(primary)}</p>
           </div>
         `;
       }
@@ -3794,7 +3869,8 @@
           const date = addDays(gridStart, index);
           const key = toInputDate(date);
           const dayRows = byDate.get(key) || [];
-          const count = dayRows.length;
+          const displayGroups = groupRowsForDisplay(dayRows);
+          const count = displayGroups.length;
           const classes = ["day", heatClass(count)];
           if (!sameMonth(date, currentMonth)) classes.push("outside");
           if (date.getDay() === 6) classes.push("saturday");
@@ -3804,7 +3880,7 @@
           return `
             <div class="${classes.join(" ")}">
               <p class="day-number">${date.getDate()}${count ? `<span class="day-count">${count}</span>` : ""}</p>
-              ${count ? `<div class="day-sends">${dayRows.map((row) => renderSendCard(row, compact)).join("")}</div>` : ""}
+              ${count ? `<div class="day-sends">${displayGroups.map((group) => renderSendCardGroup(group, compact)).join("")}</div>` : ""}
             </div>
           `;
         }).join("");
