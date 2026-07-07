@@ -2235,7 +2235,7 @@
       const CARD_PHASE_LABELS = {
         "fixed-3m": "一次募集開始",
         "fixed-1m": "遠征補助開始",
-        "fixed-3w": "遠征締切 / 二次募集開始",
+        "fixed-3w": "遠征補助・一次募集締切",
         "fixed-1w": "暫定シフト配信",
         "fixed-3d": "確定シフト配信",
         early: "早期募集",
@@ -2253,7 +2253,7 @@
 
       const events = [
         { id: "spadie-osaka-2026-06", name: "SPADIE Osaka", tag: "SPADIE大阪", series: "SPADIE OSAKA", lineAccount: "osaka", start: "2026-06-11", end: "2026-06-14", color: "#ef4444" },
-        { id: "jopt-tokyo-02-2026", name: "JOPT Tokyo #02", tag: "JOPT東京", series: "JOPT Tokyo", lineAccount: "tokyo", start: "2026-07-16", end: "2026-07-19", color: "#3b82f6", recruitment: { target: 80, applied: 45 }, ruleLabels: { "fixed-3w": "遠征補助締切" } },
+        { id: "jopt-tokyo-02-2026", name: "JOPT Tokyo #02", tag: "JOPT東京", series: "JOPT Tokyo", lineAccount: "tokyo", start: "2026-07-16", end: "2026-07-19", color: "#3b82f6", recruitment: { target: 80, applied: 45 } },
         { id: "jopt-fukuoka-01-2026", name: "JOPT Fukuoka #01", tag: "JOPT福岡", series: "JOPT Fukuoka", lineAccount: "fukuoka", start: "2026-07-30", end: "2026-08-02", color: "#14b8a6" },
         { id: "spadie-42nd-2026", name: "SPADIE 42nd", tag: "SPADIE", series: "SPADIE", lineAccount: "tokyo", start: "2026-08-07", end: "2026-08-16", color: "#a855f7", recruitment: { target: 60, applied: 28 } },
         { id: "u30-summer-2026", name: "U-30 夏", tag: "U-30", series: "U-30", lineAccount: "tokyo", start: "2026-08-21", end: "2026-08-23", color: "#22c55e", skipFixedRules: ["fixed-1m", "fixed-3w"] },
@@ -2261,10 +2261,10 @@
         { id: "sengoku-autumn-2026", name: "戦国 秋", tag: "戦国", series: "戦国", lineAccount: "tokyo", start: "2026-09-17", end: "2026-09-26", color: "#f97316" },
         { id: "jopt-sapporo-02-2026", name: "JOPT Sapporo #02", tag: "JOPT札幌", series: "JOPT Sapporo", lineAccount: "sapporo", start: "2026-09-18", end: "2026-09-24", color: "#64748b" },
         { id: "jopt-tokyo-03-2026", name: "JOPT Tokyo #03", tag: "JOPT東京", series: "JOPT Tokyo", lineAccount: "tokyo", start: "2026-10-08", end: "2026-10-11", color: "#3b82f6" },
-        { id: "jopt-osaka-02-2026", name: "JOPT Osaka #02", tag: "JOPT大阪", series: "JOPT Osaka", lineAccount: "osaka", start: "2026-10-29", end: "2026-11-02", color: "#f97316", ruleLabels: { "fixed-3w": "遠征補助締切 / 二次募集開始" } },
-        { id: "spadie-43rd-2026", name: "SPADIE 43rd", tag: "SPADIE", series: "SPADIE", lineAccount: "tokyo", start: "2026-11-19", end: "2026-11-23", color: "#a855f7", ruleLabels: { "fixed-3w": "遠征補助締切 / 二次募集開始" } },
-        { id: "tpc18-spadie-2026", name: "SPADIE OSAKA 3rd", tag: "SPADIE大阪", series: "SPADIE OSAKA", lineAccount: "osaka", start: "2026-11-26", end: "2026-11-29", color: "#ef4444", ruleLabels: { "fixed-3w": "遠征補助締切 / 二次募集開始" } },
-        { id: "jopt-tokyo-01-2027", name: "JOPT 2027 Tokyo #01", tag: "JOPT東京", series: "JOPT Tokyo", lineAccount: "tokyo", start: "2026-12-24", end: "2027-01-03", color: "#3b82f6", ruleLabels: { "fixed-3w": "遠征補助締切 / 二次募集開始" } }
+        { id: "jopt-osaka-02-2026", name: "JOPT Osaka #02", tag: "JOPT大阪", series: "JOPT Osaka", lineAccount: "osaka", start: "2026-10-29", end: "2026-11-02", color: "#f97316" },
+        { id: "spadie-43rd-2026", name: "SPADIE 43rd", tag: "SPADIE", series: "SPADIE", lineAccount: "tokyo", start: "2026-11-19", end: "2026-11-23", color: "#a855f7" },
+        { id: "tpc18-spadie-2026", name: "SPADIE OSAKA 3rd", tag: "SPADIE大阪", series: "SPADIE OSAKA", lineAccount: "osaka", start: "2026-11-26", end: "2026-11-29", color: "#ef4444" },
+        { id: "jopt-tokyo-01-2027", name: "JOPT 2027 Tokyo #01", tag: "JOPT東京", series: "JOPT Tokyo", lineAccount: "tokyo", start: "2026-12-24", end: "2027-01-03", color: "#3b82f6" }
       ].map((event) => ({
         ...event,
         startDate: parseInputDate(event.start),
@@ -2295,7 +2295,7 @@
       const fixedRules = [
         { id: "fixed-3m", kind: "fixed", rank: 100, name: "一次募集開始", windowLabel: "3か月前", offset: { unit: "months", value: -3 }, theme: "一次募集開始", shiftRange: 0 },
         { id: "fixed-1m", kind: "fixed", rank: 90, name: "遠征補助開始", windowLabel: "1か月前", offset: { unit: "months", value: -1 }, theme: "遠征補助開始", shiftRange: 0 },
-        { id: "fixed-3w", kind: "fixed", rank: 80, name: "遠征締切 / 二次募集開始", windowLabel: "37日前", offset: { unit: "days", value: -FIXED_3W_DEADLINE_DAYS }, theme: "遠征締切 / 二次募集開始", shiftRange: 0 },
+        { id: "fixed-3w", kind: "fixed", rank: 80, name: "遠征補助・一次募集締切", windowLabel: "37日前", offset: { unit: "days", value: -FIXED_3W_DEADLINE_DAYS }, theme: "遠征補助・一次募集締切", shiftRange: 0 },
         { id: "fixed-1w", kind: "fixed", rank: 70, name: "暫定シフト配信", windowLabel: "1週間前", offset: { unit: "days", value: -7 }, theme: "暫定シフト配信", shiftRange: 0 },
         { id: "fixed-3d", kind: "fixed", rank: 60, name: "確定シフト配信", windowLabel: "3日前", offset: { unit: "days", value: -3 }, theme: "確定シフト配信", shiftRange: 0 }
       ];
