@@ -1576,6 +1576,7 @@
         { eventId: "jopt-sapporo-02-2026", ruleId: "fixed-1m", date: "2026-07-21" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "fixed-3m", date: "2026-07-09" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "fixed-1m", date: "2026-07-09" },
+        { eventId: "jopt-tokyo-03-2026", ruleId: "fixed-3w", date: "2026-09-02" },
         { eventId: "tpc17-2026", ruleId: "fixed-3m", date: "2026-07-07" },
         { eventId: "tpc17-2026", ruleId: "fixed-1m", date: "2026-07-07" },
         { eventId: "tpc18-spadie-2026", ruleId: "fixed-3m", date: "2026-08-26" },
@@ -3784,8 +3785,8 @@
           a.assignedDate &&
           b.assignedDate &&
           sameDate(a.assignedDate, b.assignedDate) &&
-          a.rule.kind === "fixed" &&
-          b.rule.kind === "fixed"
+          a.rule.kind === b.rule.kind &&
+          (a.rule.kind === "fixed" || a.rule.kind === "interval")
         );
       }
 
