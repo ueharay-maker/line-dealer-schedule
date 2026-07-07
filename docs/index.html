@@ -1535,6 +1535,7 @@
     <script>
       const STORAGE_KEY = "line-dealer-schedule-v5";
       const SETTINGS_UNLOCK_STORAGE_KEY = "line-dealer-settings-unlocked";
+      const FIXED_3W_DEADLINE_DAYS = 37;
       const SETTINGS_UNLOCK_TTL_MS = 12 * 60 * 60 * 1000;
       const SETTINGS_LOCK_DIGEST = "9e8279f3f4fb32456baf3cab98857e6e43cb25a1573041255c9b7bf014d0a399";
       const MS_DAY = 24 * 60 * 60 * 1000;
@@ -1558,16 +1559,13 @@
         { eventId: "jopt-tokyo-02-2026", ruleId: "middle", date: "2026-06-08" },
         { eventId: "jopt-tokyo-02-2026", ruleId: "fixed-1m", date: "2026-06-20" },
         { eventId: "jopt-tokyo-02-2026", ruleId: "late", date: "2026-06-26" },
-        { eventId: "jopt-tokyo-02-2026", ruleId: "fixed-3w", date: "2026-07-02" },
         { eventId: "jopt-tokyo-02-2026", ruleId: "fixed-1w", date: "2026-07-04" },
         { eventId: "jopt-tokyo-02-2026", ruleId: "fixed-3d", date: "2026-07-13" },
         { eventId: "u30-summer-2026", ruleId: "early", date: "2026-06-09" },
         { eventId: "u30-summer-2026", ruleId: "middle", date: "2026-07-08" },
-        { eventId: "jopt-fukuoka-01-2026", ruleId: "fixed-3w", date: "2026-06-23" },
         { eventId: "jopt-fukuoka-01-2026", ruleId: "middle", date: "2026-06-12" },
         { eventId: "jopt-fukuoka-01-2026", ruleId: "middle", date: "2026-06-19" },
         { eventId: "spadie-42nd-2026", ruleId: "fixed-1m", date: "2026-07-07" },
-        { eventId: "spadie-42nd-2026", ruleId: "fixed-3w", date: "2026-07-01" },
         { eventId: "spadie-42nd-2026", ruleId: "middle", date: "2026-06-23" },
         { eventId: "spadie-42nd-2026", ruleId: "middle", date: "2026-07-03" },
         { eventId: "jopt-sapporo-02-2026", ruleId: "fixed-3m", date: "2026-06-26" },
@@ -1576,25 +1574,18 @@
         { eventId: "sengoku-autumn-2026", ruleId: "early", date: "2026-07-01" },
         { eventId: "sengoku-autumn-2026", ruleId: "fixed-1m", date: "2026-07-21" },
         { eventId: "jopt-sapporo-02-2026", ruleId: "fixed-1m", date: "2026-07-21" },
-        { eventId: "sengoku-autumn-2026", ruleId: "fixed-3w", date: "2026-08-11" },
-        { eventId: "jopt-sapporo-02-2026", ruleId: "fixed-3w", date: "2026-08-12" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "fixed-3m", date: "2026-07-09" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "fixed-1m", date: "2026-07-09" },
         { eventId: "tpc17-2026", ruleId: "fixed-3m", date: "2026-07-07" },
         { eventId: "tpc17-2026", ruleId: "fixed-1m", date: "2026-07-07" },
-        { eventId: "tpc17-2026", ruleId: "fixed-3w", date: "2026-08-04" },
         { eventId: "tpc18-spadie-2026", ruleId: "fixed-3m", date: "2026-08-26" },
         { eventId: "tpc18-spadie-2026", ruleId: "fixed-1m", date: "2026-08-26" },
-        { eventId: "tpc18-spadie-2026", ruleId: "fixed-3w", date: "2026-10-20" },
         { eventId: "jopt-osaka-02-2026", ruleId: "fixed-3m", date: "2026-07-29" },
         { eventId: "jopt-osaka-02-2026", ruleId: "fixed-1m", date: "2026-07-29" },
-        { eventId: "jopt-osaka-02-2026", ruleId: "fixed-3w", date: "2026-09-22" },
         { eventId: "spadie-43rd-2026", ruleId: "fixed-3m", date: "2026-08-19" },
         { eventId: "spadie-43rd-2026", ruleId: "fixed-1m", date: "2026-08-19" },
-        { eventId: "spadie-43rd-2026", ruleId: "fixed-3w", date: "2026-10-13" },
         { eventId: "jopt-tokyo-01-2027", ruleId: "fixed-3m", date: "2026-09-24" },
         { eventId: "jopt-tokyo-01-2027", ruleId: "fixed-1m", date: "2026-09-24" },
-        { eventId: "jopt-tokyo-01-2027", ruleId: "fixed-3w", date: "2026-11-17" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "early", date: "2026-07-22" }
       ];
 
@@ -1628,7 +1619,7 @@
         const dateKey = entry.onDate || entry.date;
         if (!dateKey) return false;
         if (
-          PINNED_ASSIGNMENTS.some(
+          getAllPinnedAssignments().some(
             (pin) =>
               entry.eventId === pin.eventId &&
               dateKey === pin.date &&
@@ -1652,14 +1643,14 @@
       }
 
       function getPinsForEventRule(eventId, ruleId) {
-        return PINNED_ASSIGNMENTS.filter((pin) => pin.eventId === eventId && pin.ruleId === ruleId)
+        return getAllPinnedAssignments().filter((pin) => pin.eventId === eventId && pin.ruleId === ruleId)
           .map((pin) => parseInputDate(pin.date))
           .filter(Boolean);
       }
 
       function applyPinnedAssignments(rows) {
         const usedRowIds = new Set();
-        for (const pin of PINNED_ASSIGNMENTS) {
+        for (const pin of getAllPinnedAssignments()) {
           const target = parseInputDate(pin.date);
           if (!target) continue;
           const event = events.find((item) => item.id === pin.eventId);
@@ -1757,7 +1748,7 @@
       }
 
       function enforcePinnedPeriodicSpacing(rows) {
-        for (const pin of PINNED_ASSIGNMENTS) {
+        for (const pin of getAllPinnedAssignments()) {
           const rule = rules.find((item) => item.id === pin.ruleId);
           const event = events.find((item) => item.id === pin.eventId);
           if (!rule || !event || rule.kind === "fixed") continue;
@@ -2280,10 +2271,30 @@
         account: LINE_ACCOUNTS[event.lineAccount]
       }));
 
+      function getStandardFixed3wPins() {
+        return events
+          .filter((event) => !(event.skipFixedRules || []).includes("fixed-3w"))
+          .map((event) => ({
+            eventId: event.id,
+            ruleId: "fixed-3w",
+            date: toInputDate(addDays(event.startDate, -FIXED_3W_DEADLINE_DAYS))
+          }));
+      }
+
+      function getAllPinnedAssignments() {
+        const manualFixed3w = new Set(
+          PINNED_ASSIGNMENTS.filter((pin) => pin.ruleId === "fixed-3w").map((pin) => pin.eventId)
+        );
+        return [
+          ...PINNED_ASSIGNMENTS,
+          ...getStandardFixed3wPins().filter((pin) => !manualFixed3w.has(pin.eventId))
+        ];
+      }
+
       const fixedRules = [
         { id: "fixed-3m", kind: "fixed", rank: 100, name: "一次募集開始", windowLabel: "3か月前", offset: { unit: "months", value: -3 }, theme: "一次募集開始", shiftRange: 0 },
         { id: "fixed-1m", kind: "fixed", rank: 90, name: "遠征補助開始", windowLabel: "1か月前", offset: { unit: "months", value: -1 }, theme: "遠征補助開始", shiftRange: 0 },
-        { id: "fixed-3w", kind: "fixed", rank: 80, name: "遠征締切 / 二次募集開始", windowLabel: "37日前", offset: { unit: "days", value: -37 }, theme: "遠征締切 / 二次募集開始", shiftRange: 0 },
+        { id: "fixed-3w", kind: "fixed", rank: 80, name: "遠征締切 / 二次募集開始", windowLabel: "37日前", offset: { unit: "days", value: -FIXED_3W_DEADLINE_DAYS }, theme: "遠征締切 / 二次募集開始", shiftRange: 0 },
         { id: "fixed-1w", kind: "fixed", rank: 70, name: "暫定シフト配信", windowLabel: "1週間前", offset: { unit: "days", value: -7 }, theme: "暫定シフト配信", shiftRange: 0 },
         { id: "fixed-3d", kind: "fixed", rank: 60, name: "確定シフト配信", windowLabel: "3日前", offset: { unit: "days", value: -3 }, theme: "確定シフト配信", shiftRange: 0 }
       ];
@@ -2893,7 +2904,7 @@
       }
 
       function getPinnedFixedDate(eventId, ruleId) {
-        const pin = PINNED_ASSIGNMENTS.find((item) => item.eventId === eventId && item.ruleId === ruleId);
+        const pin = getAllPinnedAssignments().find((item) => item.eventId === eventId && item.ruleId === ruleId);
         return pin ? parseInputDate(pin.date) : null;
       }
 
