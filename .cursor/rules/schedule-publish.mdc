@@ -1,0 +1,37 @@
+---
+description: Auto-publish LINE dealer schedule changes to GitHub Pages after edits
+globs:
+  - deploy/index.html
+  - docs/index.html
+alwaysApply: false
+---
+
+# LINEディーラー募集スケジュール — 公開ルール
+
+`deploy/index.html` を変更したら、**必ず** 次を実行して GitHub Pages に反映する。
+
+```bash
+./scripts/publish.sh "変更内容の短い説明"
+```
+
+## 手順
+
+1. `deploy/index.html` を編集（正本は deploy のみでよい）
+2. `./scripts/publish.sh "コミットメッセージ"` を実行
+3. push が成功したら 1〜3 分後に https://ueharay-maker.github.io/line-dealer-schedule/ を確認
+
+## push が失敗したとき
+
+ユーザーに一度だけ案内:
+
+```bash
+gh auth login
+```
+
+または GitHub の Personal Access Token を `GITHUB_TOKEN` に設定。
+
+## 注意
+
+- `docs/index.html` は `publish.sh` が deploy から自動コピーする
+- `deploy-revision` メタタグもスクリプトが自動更新する（キャッシュ対策）
+- main へ push されると GitHub Actions も docs を同期して Pages を再デプロイする
