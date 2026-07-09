@@ -27,6 +27,14 @@ fi
 
 git commit -m "$MESSAGE"
 
+pull_latest() {
+  if git diff --quiet && git diff --staged --quiet; then
+    git pull --rebase origin main
+    return $?
+  fi
+  return 1
+}
+
 push_with_gh() {
   if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
     git push origin main
@@ -43,6 +51,12 @@ push_with_token() {
   fi
   return 1
 }
+
+if pull_latest; then
+  echo "Synced with origin/main."
+else
+  echo "Skipped pull because the working tree is not clean after commit."
+fi
 
 if push_with_gh || push_with_token; then
   echo "Published to https://ueharay-maker.github.io/line-dealer-schedule/"
