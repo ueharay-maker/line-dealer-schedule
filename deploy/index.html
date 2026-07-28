@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="deploy-revision" content="2026-07-28-1302" />
+    <meta name="deploy-revision" content="2026-07-28-1307" />
     <title>LINEディーラー募集配信スケジュール</title>
     <style>
       :root {
@@ -2059,6 +2059,144 @@
         );
       }
 
+      function tokyoDayTaken(rows, date, ignoreRowId = null) {
+        const key = toInputDate(date);
+        return rows.some(
+          (row) =>
+            row.id !== ignoreRowId &&
+            row.assignedDate &&
+            row.status !== "sent" &&
+            row.event.lineAccount === "tokyo" &&
+            toInputDate(row.assignedDate) === key
+        );
+      }
+
+      function findIntervalRealignDate(idealDate, row, rows, phaseStart, phaseEnd, prevDate, minGap) {
+        const maxShift = Math.max(minGap + 3, 10);
+        const options = [];
+        for (let distance = 0; distance <= maxShift; distance += 1) {
+          const offsets = distance === 0 ? [0] : [-distance, distance];
+          for (const offset of offsets) {
+            const candidate = addDays(idealDate, offset);
+            if (candidate < phaseStart || candidate > phaseEnd) continue;
+            if (prevDate && Math.abs(diffDays(candidate, prevDate)) < minGap) continue;
+            if (row.event.lineAccount === "tokyo" && tokyoDayTaken(rows, candidate, row.id)) continue;
+            const ownSameDay = rows.some(
+              (other) =>
+                other.id !== row.id &&
+                other.event.id === row.event.id &&
+                other.assignedDate &&
+                other.status !== "sent" &&
+                sameDate(other.assignedDate, candidate)
+            );
+            if (ownSameDay) continue;
+            options.push({ date: candidate, distance: Math.abs(offset) });
+          }
+        }
+        if (!options.length) return null;
+        options.sort((a, b) => a.distance - b.distance);
+        return options[0].date;
+      }
+
+      function realignIntervalDeliveriesFrom(rows, selectedEvents, fromDate) {
+        if (!fromDate) return;
+
+        for (const row of rows) {
+          if (row.rule.kind !== "interval") continue;
+          if (!row.assignedDate || row.assignedDate < fromDate) continue;
+          row.assignedDate = null;
+          row.dateLocked = false;
+          row.anchorSeries = false;
+          row.status = "unassigned";
+          row.reasons = ["7/28以降の定期間隔再配置"];
+        }
+
+        const orderedEvents = [...selectedEvents].sort((a, b) => a.startDate - b.startDate);
+
+        for (const event of orderedEvents) {
+          const fixedDates = new Set(getEffectiveFixedDates(event).map(toInputDate));
+
+          for (const rule of intervalRules) {
+            const phaseStart = resolveOffset(event.startDate, rule.start);
+            const phaseEnd = resolveOffset(event.startDate, rule.end);
+            const windowStart = maxDate(phaseStart, fromDate);
+            if (windowStart > phaseEnd) continue;
+
+            let slot = phaseStart;
+            while (slot < windowStart) slot = addDays(slot, rule.interval);
+
+            const prior = rows
+              .filter(
+                (row) =>
+                  row.event.id === event.id &&
+                  row.assignedDate &&
+                  row.status !== "sent" &&
+                  (row.assignedDate < windowStart ||
+                    (sameDate(row.assignedDate, windowStart) && row.rule.id !== rule.id))
+              )
+              .sort((a, b) => b.assignedDate - a.assignedDate)[0];
+            let prevDate = prior?.assignedDate || null;
+            if (prevDate) {
+              const earliest = addDays(prevDate, rule.interval);
+              if (slot < earliest) slot = earliest;
+            }
+
+            while (slot <= phaseEnd) {
+              if (slot < windowStart) {
+                slot = addDays(slot, 1);
+                continue;
+              }
+              if (shouldSkipPeriodicDate(slot, event, rule, fixedDates)) {
+                slot = addDays(slot, 1);
+                continue;
+              }
+
+              if (prevDate && diffDays(slot, prevDate) < rule.interval) {
+                slot = addDays(prevDate, rule.interval);
+                continue;
+              }
+
+              let row = rows.find(
+                (candidate) =>
+                  candidate.event.id === event.id &&
+                  candidate.rule.id === rule.id &&
+                  !candidate.assignedDate &&
+                  candidate.status !== "sent"
+              );
+              if (!row) {
+                row = createCandidate(event, rule, slot, phaseStart, phaseEnd, rows.length);
+                rows.push(row);
+              }
+
+              row.idealDate = slot;
+              row.windowStart = phaseStart;
+              row.windowEnd = phaseEnd;
+
+              const minGap = prevDate ? rule.interval : 0;
+              const placed = findIntervalRealignDate(slot, row, rows, phaseStart, phaseEnd, prevDate, minGap);
+              if (!placed) {
+                slot = addDays(slot, 1);
+                continue;
+              }
+
+              row.assignedDate = placed;
+              row.dateLocked = true;
+              row.anchorSeries = true;
+              row.status = sameDate(placed, slot) ? "ok" : "adjusted";
+              row.reasons = [
+                ...new Set([
+                  ...(row.reasons || []),
+                  "定期間隔",
+                  ...(sameDate(placed, slot) ? [] : ["東京LINE同日回避"])
+                ])
+              ];
+              prevDate = placed;
+              slot = addDays(placed, rule.interval);
+            }
+          }
+        }
+      }
+
       function fillPeriodicScheduleGaps(rows, selectedEvents, scheduleStart) {
         const accountEventsMap = eventsByAccount(selectedEvents);
         let occupiedByAccount = rebuildOccupiedByAccount(rows);
@@ -2294,7 +2432,9 @@
         fukuoka: { id: "fukuoka", name: "JOPT Fukuoka LINE", shortName: "福岡", color: "#14b8a6" },
         sapporo: { id: "sapporo", name: "JOPT Sapporo LINE", shortName: "札幌", color: "#64748b" }
       };
-      const NO_CONSECUTIVE_ACCOUNT_IDS = new Set(Object.keys(LINE_ACCOUNTS));
+      const NO_CONSECUTIVE_ACCOUNT_IDS = new Set(["tokyo"]);
+      const ACCOUNT_DAY_UNIQUE_IDS = new Set(["tokyo"]);
+      const INTERVAL_REALIGN_FROM = "2026-07-28";
 
       const events = [
         { id: "spadie-osaka-2026-06", name: "SPADIE Osaka", tag: "SPADIE大阪", series: "SPADIE OSAKA", lineAccount: "osaka", start: "2026-06-11", end: "2026-06-14", color: "#ef4444" },
@@ -2924,6 +3064,8 @@
         applyPinnedAssignments(latestRows);
         finalizePostAssignments(latestRows, selectedEvents);
         fillPeriodicScheduleGaps(latestRows, selectedEvents, startDate);
+        realignIntervalDeliveriesFrom(latestRows, selectedEvents, parseInputDate(INTERVAL_REALIGN_FROM));
+        applyPinnedAssignments(latestRows);
         rowById.clear();
         for (const row of latestRows) rowById.set(row.id, row);
         updateSimulationBox();
@@ -3306,7 +3448,9 @@
       function diagnosePlacement(date, item, occupied, accountEvents, periodicByEvent = {}) {
         const key = toInputDate(date);
         const failures = [];
-        if (occupied.has(key)) failures.push("account");
+        if (ACCOUNT_DAY_UNIQUE_IDS.has(item.event.lineAccount) && occupied.has(key)) {
+          failures.push("account");
+        }
         if (
           item.rule.kind !== "fixed" &&
           NO_CONSECUTIVE_ACCOUNT_IDS.has(item.event.lineAccount) &&
@@ -3427,6 +3571,7 @@
         const groups = new Map();
         for (const row of rows) {
           if (!row.assignedDate || row.rule.kind === "fixed") continue;
+          if (!ACCOUNT_DAY_UNIQUE_IDS.has(row.event.lineAccount)) continue;
           const groupKey = `${row.event.lineAccount}:${toInputDate(row.assignedDate)}`;
           if (!groups.has(groupKey)) groups.set(groupKey, []);
           groups.get(groupKey).push(row);
@@ -3642,6 +3787,7 @@
 
           for (const [, groupRows] of groups) {
             if (groupRows.length <= 1) continue;
+            if (!ACCOUNT_DAY_UNIQUE_IDS.has(groupRows[0].event.lineAccount)) continue;
 
             const periodicRows = groupRows.filter((row) => row.rule.kind !== "fixed");
             if (!periodicRows.length) continue;
