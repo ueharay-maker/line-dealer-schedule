@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="deploy-revision" content="2026-07-28-1251" />
+    <meta name="deploy-revision" content="2026-07-28-1302" />
     <title>LINEディーラー募集配信スケジュール</title>
     <style>
       :root {
@@ -1596,13 +1596,15 @@
         { eventId: "jopt-tokyo-01-2027", ruleId: "fixed-3w", date: "2026-11-17" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "fixed-3m", date: "2026-07-14" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "fixed-1m", date: "2026-07-14" },
-        { eventId: "jopt-tokyo-03-2026", ruleId: "early", date: "2026-08-01" }
+        { eventId: "jopt-tokyo-03-2026", ruleId: "early", date: "2026-07-21" }
       ];
 
       const INTERVAL_ANCHORED_SERIES = [
         { eventId: "spadie-42nd-2026", ruleId: "middle", anchorDate: "2026-06-08" },
         { eventId: "spadie-42nd-2026", ruleId: "late", anchorDate: "2026-07-23" },
-        { eventId: "jopt-tokyo-03-2026", ruleId: "early", anchorDate: "2026-08-01" },
+        { eventId: "jopt-tokyo-03-2026", ruleId: "early", anchorDate: "2026-07-21" },
+        { eventId: "jopt-tokyo-03-2026", ruleId: "middle", anchorDate: "2026-08-26" },
+        { eventId: "jopt-tokyo-03-2026", ruleId: "late", anchorDate: "2026-09-08" },
         { eventId: "jopt-sapporo-02-2026", ruleId: "early", anchorDate: "2026-07-02" },
         { eventId: "tpc17-2026", ruleId: "early", anchorDate: "2026-07-15" },
         { eventId: "tpc17-2026", ruleId: "middle", anchorDate: "2026-07-15" },
@@ -1891,8 +1893,10 @@
 
           const phaseStart = resolveOffset(event.startDate, rule.start);
           const phaseEnd = resolveOffset(event.startDate, rule.end);
+          const fixedDates = new Set(getEffectiveFixedDates(event).map(toInputDate));
           const slotDates = [];
           for (let date = anchorDate; date <= phaseEnd; date = addDays(date, rule.interval)) {
+            if (shouldSkipPeriodicDate(date, event, rule, fixedDates)) continue;
             slotDates.push(startOfDay(date));
           }
 
@@ -1921,20 +1925,39 @@
 
             row.windowStart = windowStart;
             row.windowEnd = phaseEnd;
-            if (isPinnedSlot || index === 0) {
-              const key = toInputDate(slotDate);
-              const incumbent = occupied.get(key);
-              if (incumbent && incumbent.id !== row.id && !isRowDateLocked(incumbent)) {
-                incumbent.assignedDate = null;
-                incumbent.status = "blocked";
-                incumbent.reasons = [...new Set([...(incumbent.reasons || []), "実配信日優先"])];
-                occupied.delete(key);
-              }
+
+            if (row.assignedDate) {
+              const previousKey = toInputDate(row.assignedDate);
+              if (occupied.get(previousKey)?.id === row.id) occupied.delete(previousKey);
+              row.assignedDate = null;
             }
-            const placedDate =
-              isPinnedSlot || index === 0
-                ? slotDate
-                : findAnchorSeriesSlotDate(slotDate, row, occupied, accountEvents, prevAssignedDate, rule);
+
+            const key = toInputDate(slotDate);
+            const incumbent = occupied.get(key);
+            if (incumbent && incumbent.id === row.id) {
+              occupied.delete(key);
+            } else if (incumbent && !isRowDateLocked(incumbent)) {
+              incumbent.assignedDate = null;
+              incumbent.status = "blocked";
+              incumbent.reasons = [...new Set([...(incumbent.reasons || []), "配信間隔優先"])];
+              occupied.delete(key);
+            }
+
+            let placedDate = null;
+            if (isPinnedSlot || index === 0) {
+              placedDate = slotDate;
+            } else if (!occupied.has(key) && canPlaceForGapFill(slotDate, row, occupied, accountEvents, {})) {
+              placedDate = slotDate;
+            } else {
+              placedDate = findAnchorSeriesSlotDate(
+                slotDate,
+                row,
+                occupied,
+                accountEvents,
+                prevAssignedDate,
+                rule
+              );
+            }
 
             usedIds.add(row.id);
             row.idealDate = slotDate;
@@ -1945,7 +1968,7 @@
               return;
             }
             row.assignedDate = placedDate;
-            row.dateLocked = isPinnedSlot || index === 0;
+            row.dateLocked = isPinnedSlot || index === 0 || sameDate(placedDate, slotDate);
             row.anchorSeries = true;
             row.status = sameDate(placedDate, slotDate) ? "ok" : "adjusted";
             row.reasons = [
@@ -2030,6 +2053,12 @@
         return options[0].date;
       }
 
+      function hasIntervalAnchor(eventId, ruleId) {
+        return INTERVAL_ANCHORED_SERIES.some(
+          (anchor) => anchor.eventId === eventId && anchor.ruleId === ruleId
+        );
+      }
+
       function fillPeriodicScheduleGaps(rows, selectedEvents, scheduleStart) {
         const accountEventsMap = eventsByAccount(selectedEvents);
         let occupiedByAccount = rebuildOccupiedByAccount(rows);
@@ -2040,6 +2069,7 @@
           const fixedDates = new Set(getEffectiveFixedDates(event).map(toInputDate));
 
           for (const rule of intervalRules) {
+            if (hasIntervalAnchor(event.id, rule.id)) continue;
             const phaseStart = resolveOffset(event.startDate, rule.start);
             const phaseEnd = resolveOffset(event.startDate, rule.end);
             const assignableStart = maxDate(phaseStart, scheduleStart);
@@ -2166,6 +2196,10 @@
             while (cursor < next.assignedDate && diffDays(next.assignedDate, cursor) >= minGap) {
               const activeRule = ruleForGapCursor(event, cursor) || current.rule;
               if (activeRule.kind === "fixed") break;
+              if (hasIntervalAnchor(event.id, activeRule.id)) {
+                cursor = addDays(cursor, Math.max(activeRule.interval || 1, 1));
+                continue;
+              }
 
               const phaseStart = resolveOffset(event.startDate, activeRule.start);
               const phaseEnd = resolveOffset(event.startDate, activeRule.end);
