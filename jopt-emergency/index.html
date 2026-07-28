@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c1017" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>JOPT 緊急対応マニュアル</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-0: #0c1017;
+      --bg-1: #141b26;
+      --ink: #f4f1ea;
+      --muted: #a8b0bd;
+      --line: rgba(255, 255, 255, 0.12);
+      --blue: #1d6fd8;
+      --blue-deep: #0f3f8a;
+      --orange: #e36520;
+      --orange-deep: #b33a12;
+      --red: #d41818;
+      --red-deep: #8a0c0c;
+      --warn: #ff3b30;
+      --ok: #2f9e6b;
+      --safe-pad: env(safe-area-inset-bottom, 0px);
+      --top-pad: env(safe-area-inset-top, 0px);
+      --font-display: "Archivo Black", "Zen Kaku Gothic New", sans-serif;
+      --font-body: "Zen Kaku Gothic New", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-weight: 500;
+      line-height: 1.55;
+      background:
+        radial-gradient(120% 80% at 50% -10%, rgba(212, 24, 24, 0.22), transparent 55%),
+        radial-gradient(90% 60% at 100% 20%, rgba(29, 111, 216, 0.16), transparent 50%),
+        radial-gradient(70% 50% at 0% 80%, rgba(227, 101, 32, 0.14), transparent 45%),
+        linear-gradient(180deg, var(--bg-0), var(--bg-1) 40%, #0a0e14);
+      min-height: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      border: 0;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .app {
+      width: min(480px, 100%);
+      margin: 0 auto;
+      min-height: 100%;
+      padding: calc(18px + var(--top-pad)) 16px calc(28px + var(--safe-pad));
+      position: relative;
+    }
+
+    .view { display: none; animation: rise 0.35s ease both; }
+    .view.active { display: block; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(212, 24, 24, 0.55), 0 18px 40px rgba(212, 24, 24, 0.35); }
+      50% { box-shadow: 0 0 0 10px rgba(212, 24, 24, 0), 0 18px 40px rgba(212, 24, 24, 0.45); }
+    }
+
+    @keyframes bar-flash {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    /* —— Home —— */
+    .brand {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .brand img {
+      width: 72px;
+      height: auto;
+      display: block;
+      margin: 0 auto 10px;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,.45));
+    }
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 12vw, 3.4rem);
+      letter-spacing: 0.04em;
+      line-height: 0.95;
+      margin: 0;
+    }
+    .brand-sub {
+      margin: 8px 0 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .priority {
+      margin: 18px 0 22px;
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: #ffe3a8;
+      letter-spacing: 0.02em;
+    }
+
+    .home-actions {
+      display: grid;
+      gap: 14px;
+    }
+
+    .mode-btn {
+      display: grid;
+      gap: 6px;
+      width: 100%;
+      text-align: left;
+      padding: 22px 20px;
+      border-radius: 18px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .mode-btn:active { transform: scale(0.985); filter: brightness(1.05); }
+    .mode-btn .label {
+      font-size: 1.85rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      line-height: 1.1;
+    }
+    .mode-btn .sub {
+      font-size: 0.98rem;
+      font-weight: 700;
+      opacity: 0.92;
+      line-height: 1.35;
+    }
+
+    .mode-btn.quake {
+      min-height: 108px;
+      background: linear-gradient(145deg, var(--blue) 0%, var(--blue-deep) 100%);
+      box-shadow: 0 14px 30px rgba(29, 111, 216, 0.32);
+    }
+    .mode-btn.fire {
+      min-height: 108px;
+      background: linear-gradient(145deg, #f07820 0%, var(--orange-deep) 100%);
+      box-shadow: 0 14px 30px rgba(227, 101, 32, 0.32);
+    }
+    .mode-btn.evac {
+      min-height: 148px;
+      padding: 28px 22px;
+      border-radius: 22px;
+      background: linear-gradient(160deg, #ff2a2a 0%, var(--red) 40%, var(--red-deep) 100%);
+      border: 2px solid rgba(255, 220, 220, 0.35);
+      animation: pulse-glow 2.2s ease-in-out infinite;
+    }
+    .mode-btn.evac .label {
+      font-size: 2.15rem;
+      letter-spacing: 0.02em;
+    }
+    .mode-btn.evac .sub {
+      font-size: 1.08rem;
+      font-weight: 900;
+    }
+
+    /* —— Shared page chrome —— */
+    .page-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .page-title {
+      margin: 0;
+      font-size: clamp(1.55rem, 6.5vw, 1.9rem);
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+    }
+    .page-title.huge {
+      font-size: clamp(1.7rem, 7vw, 2.15rem);
+    }
+    .back-btn {
+      flex-shrink: 0;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--line);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .back-btn.small {
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      opacity: 0.7;
+    }
+
+    .lead-warn {
+      margin: 0 0 18px;
+      padding: 16px 16px;
+      border-radius: 14px;
+      background: rgba(212, 24, 24, 0.18);
+      border: 1px solid rgba(255, 80, 80, 0.45);
+      font-weight: 900;
+      font-size: 1.02rem;
+      line-height: 1.45;
+    }
+    .lead-warn p { margin: 0; }
+    .lead-warn p + p { margin-top: 10px; }
+
+    .section-label {
+      margin: 8px 0 12px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .role-grid {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .role-btn {
+      min-height: 92px;
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
+      font-size: 1.7rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--line);
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .role-btn:active { transform: scale(0.985); }
+    .role-btn.floor {
+      background: linear-gradient(145deg, #1a4f8c, #12345f);
+      box-shadow: 0 10px 24px rgba(29, 111, 216, 0.22);
+    }
+    .role-btn.dealer {
+      background: linear-gradient(145deg, #2a2f3a, #171b24);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+      border-color: rgba(255,255,255,0.18);
+    }
+    .role-btn.active-role {
+      outline: 3px solid #ffe3a8;
+      outline-offset: 2px;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; animation: rise 0.3s ease both; }
+
+    .do-list {
+      display: grid;
+      gap: 12px;
+      margin: 0 0 20px;
+      padding: 0;
+      list-style: none;
+    }
+    .do-item {
+      padding: 16px 16px 16px 18px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border-left: 4px solid var(--blue);
+    }
+    .do-item.fire-accent { border-left-color: #f07820; }
+    .do-item.evac-accent { border-left-color: var(--red); }
+    .do-item h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+    .do-item p, .do-item ul {
+      margin: 0;
+      color: #d7dde8;
+      font-size: 0.95rem;
+    }
+    .do-item ul {
+      padding-left: 1.1em;
+    }
+    .do-item li + li { margin-top: 4px; }
+    .quotes {
+      margin: 8px 0 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.28);
+      font-weight: 700;
+      color: #fff;
+    }
+    .quotes li { margin: 0; list-style: none; }
+    .quotes ul { margin: 0; padding: 0; list-style: none; }
+    .quotes li + li { margin-top: 4px; }
+
+    .dont {
+      margin: 0 0 18px;
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(212, 24, 24, 0.14);
+      border: 1px solid rgba(255, 90, 90, 0.35);
+    }
+    .dont h3 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: #ffb4b0;
+    }
+    .dont ul {
+      margin: 0;
+      padding-left: 1.15em;
+      font-weight: 700;
+    }
+    .dont li + li { margin-top: 6px; }
+
+    .order {
+      margin: 8px 0 16px;
+      padding: 22px 16px;
+      border-radius: 18px;
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+    }
+    .order-step {
+      font-size: 1.55rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+    }
+    .order-arrow {
+      margin: 6px 0;
+      font-size: 1.4rem;
+      color: #ffe3a8;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .danger-box {
+      margin: 0 0 18px;
+      padding: 18px 16px;
+      border-radius: 14px;
+      background: linear-gradient(160deg, rgba(212,24,24,0.35), rgba(138,12,12,0.45));
+      border: 1.5px solid rgba(255,120,120,0.55);
+    }
+    .danger-box h3 {
+      margin: 0 0 10px;
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+    .danger-box p {
+      margin: 0;
+      font-weight: 900;
+      font-size: 1.02rem;
+    }
+    .danger-box p + p { margin-top: 10px; }
+
+    .after-box {
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+    }
+    .after-box h3 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+      font-weight: 900;
+    }
+    .after-box ul {
+      margin: 0;
+      padding-left: 1.15em;
+      font-weight: 700;
+      color: #d7dde8;
+    }
+    .after-box li + li { margin-top: 8px; }
+
+    .phase-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .phase-tab {
+      padding: 12px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line);
+      font-weight: 800;
+      font-size: 0.92rem;
+    }
+    .phase-tab.active {
+      background: rgba(255,255,255,0.14);
+      border-color: rgba(255,255,255,0.35);
+    }
+
+    .photo-box {
+      margin: 0 0 18px;
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(47, 158, 107, 0.12);
+      border: 1px solid rgba(47, 158, 107, 0.35);
+    }
+    .photo-box h3 {
+      margin: 0 0 8px;
+      font-weight: 900;
+      font-size: 1.02rem;
+      color: #9be7c2;
+    }
+    .photo-box ol {
+      margin: 0;
+      padding-left: 1.2em;
+      font-weight: 700;
+      color: #d7dde8;
+    }
+    .photo-box li + li { margin-top: 6px; }
+
+    .note {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    /* Fixed evacuate warning bar */
+    .evac-bar {
+      display: none;
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      padding: 12px 14px calc(12px + var(--safe-pad));
+      text-align: center;
+      font-weight: 900;
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+      color: #fff;
+      background: linear-gradient(90deg, #9a0000, #d41818, #9a0000);
+      background-size: 200% 200%;
+      animation: bar-flash 3s ease infinite;
+      border-top: 1px solid rgba(255,200,200,0.35);
+    }
+    body.evac-mode .evac-bar { display: block; }
+    body.evac-mode .app {
+      padding-bottom: calc(78px + var(--safe-pad));
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 22px 0;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+
+    <!-- ========== HOME ========== -->
+    <section class="view active" id="view-home" data-view="home">
+      <header class="brand">
+        <img src="jopt-logo-white.png" alt="JOPT" width="72" height="86" />
+        <h1 class="brand-name">JOPT</h1>
+        <p class="brand-sub">緊急対応マニュアル</p>
+      </header>
+      <p class="priority">人命・安全を最優先してください</p>
+      <div class="home-actions">
+        <button type="button" class="mode-btn quake" data-go="quake">
+          <span class="label">地震</span>
+          <span class="sub">揺れている・揺れが収まった</span>
+        </button>
+        <button type="button" class="mode-btn fire" data-go="fire">
+          <span class="label">火災</span>
+          <span class="sub">煙・炎・火災を確認した</span>
+        </button>
+        <button type="button" class="mode-btn evac" data-go="evac">
+          <span class="label">🚨 今すぐ避難</span>
+          <span class="sub">避難指示が出た・危険が迫っている</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========== QUAKE ========== -->
+    <section class="view" id="view-quake" data-view="quake">
+      <div class="page-head">
+        <h2 class="page-title">地震対応</h2>
+        <button type="button" class="back-btn" data-go="home">トップへ</button>
+      </div>
+      <p class="note">まず状況を選び、自分の役職を選んでください。</p>
+      <div class="phase-tabs" role="tablist">
+        <button type="button" class="phase-tab active" data-quake-phase="during">揺れている間</button>
+        <button type="button" class="phase-tab" data-quake-phase="after">揺れが収まった後</button>
+      </div>
+
+      <div class="section-label">あなたは？</div>
+      <div class="role-grid">
+        <button type="button" class="role-btn floor" data-quake-role="floor">フロア</button>
+        <button type="button" class="role-btn dealer" data-quake-role="dealer">ディーラー</button>
+      </div>
+
+      <div class="panel" id="quake-during-floor">
+        <h3 class="section-label">フロア：今やること</h3>
+        <ul class="do-list">
+          <li class="do-item">
+            <h3>① その場で安全確保</h3>
+            <p>無理に移動しない。頭部と身体を守り、倒れやすい什器・照明から離れる。</p>
+          </li>
+          <li class="do-item">
+            <h3>② プレイヤーへ声かけ</h3>
+            <div class="quotes"><ul>
+              <li>「その場で頭を守ってください」</li>
+              <li>「落ち着いてください」</li>
+            </ul></div>
+          </li>
+          <li class="do-item">
+            <h3>③ エレベーター使用禁止を周知</h3>
+            <p>揺れの最中・直後はエレベーターへ誘導しない。</p>
+          </li>
+        </ul>
+        <div class="dont">
+          <h3>やってはいけないこと</h3>
+          <ul>
+            <li>走って避難を始めない（揺れが収まるまで）</li>
+            <li>チップ・機材の回収を優先しない</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel" id="quake-during-dealer">
+        <h3 class="section-label">ディーラー：今やること</h3>
+        <ul class="do-list">
+          <li class="do-item">
+            <h3>① 自身の安全確保</h3>
+            <p>無理に立たず、頭部と身体を守る。テーブル下など近くの安全な姿勢をとる。</p>
+          </li>
+          <li class="do-item">
+            <h3>② プレイヤーへ短く声かけ</h3>
+            <div class="quotes"><ul>
+              <li>「その場で頭を守ってください」</li>
+            </ul></div>
+          </li>
+          <li class="do-item">
+            <h3>③ カード・チップに触れない</h3>
+            <p>揺れの最中は整理・撮影をしない。</p>
+          </li>
+        </ul>
+        <div class="dont">
+          <h3>やってはいけないこと</h3>
+          <ul>
+            <li>撮影・記録のために動き回らない</li>
+            <li>荷物を取りに動かない</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel" id="quake-after-floor">
+        <h3 class="section-label">フロア：今やること</h3>
+        <ul class="do-list">
+          <li class="do-item">
+            <h3>① 担当エリアの安全確認</h3>
+            <p>天井・照明・サイネージ・テーブル・負傷者・煙の有無を確認し、責任者へ報告。</p>
+          </li>
+          <li class="do-item">
+            <h3>② プレイヤーへ待機案内</h3>
+            <div class="quotes"><ul>
+              <li>「着席のまま待機してください」</li>
+              <li>「スタッフの指示に従ってください」</li>
+            </ul></div>
+          </li>
+          <li class="do-item">
+            <h3>③ 避難指示が出たら誘導へ切替</h3>
+            <p>避難が必要になったら、トップの「今すぐ避難」に従う。</p>
+          </li>
+          <li class="do-item">
+            <h3>④ ディーラーの状況を確認</h3>
+            <p>安全な範囲で声かけ。危険があれば確認のために残らない。</p>
+          </li>
+        </ul>
+        <div class="photo-box">
+          <h3>チップスタック撮影（安全な待機時のみ）</h3>
+          <ol>
+            <li>トナメ担、TDから「待機・再開準備」の指示がある場合のみ実施</li>
+            <li>ディーラーへ撮影を依頼し、卓全体が映るように写真を取って記録</li>
+            <li>避難指示・危険を感じたら撮影を中止し避難</li>
+          </ol>
+        </div>
+        <div class="dont">
+          <h3>やってはいけないこと</h3>
+          <ul>
+            <li>危険箇所へプレイヤーを近づけない</li>
+            <li>エレベーターを使わせない</li>
+            <li>撮影のために避難を遅らせない</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel" id="quake-after-dealer">
+        <h3 class="section-label">ディーラー：今やること</h3>
+        <ul class="do-list">
+          <li class="do-item">
+            <h3>① プレイヤーへ待機案内</h3>
+            <div class="quotes"><ul>
+              <li>「着席のままお待ちください」</li>
+              <li>「スタッフの指示に従ってください」</li>
+            </ul></div>
+          </li>
+          <li class="do-item">
+            <h3>② 指示があるまでゲームを再開しない</h3>
+            <p>フロア／責任者の指示を待つ。</p>
+          </li>
+          <li class="do-item">
+            <h3>③ 避難指示が出たら直ちに避難</h3>
+            <p>トップの「今すぐ避難」に従う。</p>
+          </li>
+        </ul>
+        <div class="photo-box">
+          <h3>チップスタック撮影方法（安全な待機時のみ）</h3>
+          <ol>
+            <li>トナメ担、TDから「待機・再開準備」の指示がある場合のみ実施</li>
+            <li>各プレイヤーのスタックが分かるように卓全体、トーナメントクロックを撮影</li>
+            <li>避難指示が出ている／危険を感じる場合は撮影しない</li>
+          </ol>
+        </div>
+        <div class="dont">
+          <h3>やってはいけないこと</h3>
+          <ul>
+            <li>チップ・カードの過度な整理をしない</li>
+            <li>荷物・スマホを取りに動かない</li>
+            <li>撮影のために避難を遅らせない</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FIRE ========== -->
+    <section class="view" id="view-fire" data-view="fire">
+      <div class="page-head">
+        <h2 class="page-title">火災対応</h2>
+        <button type="button" class="back-btn" data-go="home">トップへ</button>
+      </div>
+      <p class="lead-warn" style="background:rgba(227,101,32,.18);border-color:rgba(240,120,32,.45)">
+        <strong>煙・炎・火災を確認したら、自分と周囲の安全を確保したうえで直ちに報告してください。</strong>
+      </p>
+
+      <div class="section-label">あなたは？</div>
+      <div class="role-grid">
+        <button type="button" class="role-btn floor" data-fire-role="floor">フロア</button>
+        <button type="button" class="role-btn dealer" data-fire-role="dealer">ディーラー</button>
+      </div>
+
+      <div class="panel" id="fire-floor">
+        <h3 class="section-label">フロア：今やること</h3>
+        <ul class="do-list">
+          <li class="do-item fire-accent">
+            <h3>① 周囲へ注意喚起し報告</h3>
+            <p>「火事です」等を声かけ。責任者・ディレクターへ場所と状況を報告。</p>
+          </li>
+          <li class="do-item fire-accent">
+            <h3>② 初期消火は安全な範囲のみ</h3>
+            <p>退路を確保できる小規模火災に限る。危険なら消火に固執せず避難誘導へ切替。</p>
+          </li>
+          <li class="do-item fire-accent">
+            <h3>③ 避難誘導</h3>
+            <div class="quotes"><ul>
+              <li>「落ち着いてください」</li>
+              <li>「走らないでください」</li>
+              <li>「階段をご利用ください」</li>
+              <li>「スタッフの誘導に従ってください」</li>
+            </ul></div>
+          </li>
+          <li class="do-item fire-accent">
+            <h3>④ 非常口・階段へ誘導</h3>
+            <p>エレベーターは使用させない。殺到・押し合いを防ぐ。</p>
+          </li>
+        </ul>
+        <div class="photo-box">
+          <h3>チップスタック撮影について</h3>
+          <ol>
+            <li>火災・煙がある状況では撮影しない</li>
+            <li>避難が必要な場面ではチップ・カードはそのまま</li>
+            <li>撮影より避難を優先</li>
+          </ol>
+        </div>
+        <div class="dont">
+          <h3>やってはいけないこと</h3>
+          <ul>
+            <li>炎が天井付近・煙が急速拡大・消火器1本で止められない場合に消火を続けない</li>
+            <li>危険な場所へ残らない・戻らない</li>
+            <li>プレイヤーをエレベーターへ誘導しない</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel" id="fire-dealer">
+        <h3 class="section-label">ディーラー：今やること</h3>
+        <ul class="do-list">
+          <li class="do-item fire-accent">
+            <h3>① プレイヤーへ避難を案内</h3>
+            <div class="quotes"><ul>
+              <li>「スタッフの誘導に従ってください」</li>
+            </ul></div>
+          </li>
+          <li class="do-item fire-accent">
+            <h3>② チップ・カードの整理をしない</h3>
+            <p>火災時はそのままにし、避難を優先。</p>
+          </li>
+          <li class="do-item fire-accent">
+            <h3>③ 撮影より避難を優先</h3>
+            <p>煙・炎・避難指示がある場合はチップスタック撮影を行わない。</p>
+          </li>
+          <li class="do-item fire-accent">
+            <h3>④ 案内したら自身も避難</h3>
+            <p>フロアの誘導に従い、非常口・階段へ移動。</p>
+          </li>
+        </ul>
+        <div class="dont">
+          <h3>やってはいけないこと</h3>
+          <ul>
+            <li>チップ・カード・スマホ・バッグを取りに戻らない</li>
+            <li>エレベーターを使わない</li>
+            <li>撮影・確認のために避難を遅らせない</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== EVAC ========== -->
+    <section class="view" id="view-evac" data-view="evac">
+      <div class="page-head">
+        <h2 class="page-title huge">🚨 今すぐ避難してください</h2>
+        <button type="button" class="back-btn small" data-go="home">トップ</button>
+      </div>
+
+      <div class="lead-warn">
+        <p>チップ・カード・機材・私物より人命を優先してください。</p>
+        <p>撮影・確認・記録のために避難を遅らせないでください。</p>
+      </div>
+
+      <div class="section-label">あなたは？</div>
+      <div class="role-grid">
+        <button type="button" class="role-btn floor" data-evac-role="floor">フロア</button>
+        <button type="button" class="role-btn dealer" data-evac-role="dealer">ディーラー</button>
+      </div>
+
+      <div class="panel" id="evac-floor">
+        <h3 class="section-label">フロア：今やること</h3>
+        <ul class="do-list">
+          <li class="do-item evac-accent">
+            <h3>① プレイヤーへ避難を案内</h3>
+            <div class="quotes"><ul>
+              <li>「落ち着いてください」</li>
+              <li>「走らないでください」</li>
+              <li>「階段をご利用ください」</li>
+              <li>「スタッフの誘導に従ってください」</li>
+            </ul></div>
+          </li>
+          <li class="do-item evac-accent">
+            <h3>② 非常口・階段へ誘導</h3>
+            <p>エレベーターは使用させない。<br>出口への殺到や押し合いを防ぎながら誘導する。</p>
+          </li>
+          <li class="do-item evac-accent">
+            <h3>③ 担当エリアからプレイヤーを退避させる</h3>
+            <p>安全な範囲で周囲へ声をかけながら避難誘導する。</p>
+          </li>
+          <li class="do-item evac-accent">
+            <h3>④ ディーラーの退避を確認</h3>
+            <p>ただし、自分自身に危険が迫っている場合は確認のために残らない。</p>
+          </li>
+          <li class="do-item evac-accent">
+            <h3>⑤ 自身も速やかに避難</h3>
+            <p><strong>危険な場所へ残らない・戻らない。</strong></p>
+          </li>
+        </ul>
+        <div class="dont">
+          <h3>やってはいけないこと</h3>
+          <ul>
+            <li>チップ・カード・機材の整理・回収</li>
+            <li>撮影・確認・記録のための残留</li>
+            <li>危険な場所への再進入</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel" id="evac-dealer">
+        <h3 class="section-label">ディーラー：今やること</h3>
+        <ul class="do-list">
+          <li class="do-item evac-accent">
+            <h3>① プレイヤーへ避難を案内</h3>
+            <div class="quotes"><ul>
+              <li>「スタッフの誘導に従ってください」</li>
+            </ul></div>
+          </li>
+          <li class="do-item evac-accent">
+            <h3>② チップ・カードの整理をしない</h3>
+            <p>避難が必要な状況では、そのままにする。</p>
+          </li>
+          <li class="do-item evac-accent">
+            <h3>③ 撮影より避難を優先</h3>
+            <p>避難指示が出ている場合や危険が迫っている場合は、チップスタックの撮影を行わない。</p>
+          </li>
+          <li class="do-item evac-accent">
+            <h3>④ プレイヤーの避難を案内したら自身も避難</h3>
+            <p>フロアの誘導に従い、非常口・階段へ移動する。</p>
+          </li>
+          <li class="do-item evac-accent">
+            <h3>⑤ 絶対に戻らない</h3>
+            <p>チップ、カード、スマートフォン、バッグ等を取りに会場へ戻らない。</p>
+          </li>
+        </ul>
+        <div class="dont">
+          <h3>やってはいけないこと</h3>
+          <ul>
+            <li>チップ・カードの整理</li>
+            <li>チップスタック撮影</li>
+            <li>私物を取りに戻ること</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 class="section-label">避難順序</h3>
+      <div class="order" aria-label="避難順序">
+        <div class="order-step">プレイヤー</div>
+        <div class="order-arrow">↓</div>
+        <div class="order-step">ディーラー</div>
+        <div class="order-arrow">↓</div>
+        <div class="order-step">フロア</div>
+      </div>
+
+      <div class="danger-box">
+        <h3>⚠️ 危険が迫っている場合</h3>
+        <p>この順番にこだわらず、全員直ちに避難してください。</p>
+        <p>取り残された人の確認や撮影のために危険な場所へ戻らないでください。</p>
+      </div>
+
+      <div class="after-box">
+        <h3>避難後</h3>
+        <ul>
+          <li>安全な指定場所へ移動。</li>
+          <li>入口・道路・スロープ・消防車両の進入経路には滞留しない。</li>
+          <li>責任者から許可が出るまで再入場しない。</li>
+          <li>プレイヤーから荷物やチップを取りたいと言われても再入場させない。</li>
+          <li>自分自身も荷物・スマートフォン等を取りに戻らない。</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <div class="evac-bar" role="status">🚨 危険を感じたら指示を待たず安全確保</div>
+
+  <script>
+    (function () {
+      const body = document.body;
+      const views = {
+        home: document.getElementById("view-home"),
+        quake: document.getElementById("view-quake"),
+        fire: document.getElementById("view-fire"),
+        evac: document.getElementById("view-evac"),
+      };
+
+      let quakePhase = "during";
+      let quakeRole = null;
+      let fireRole = null;
+      let evacRole = null;
+
+      function go(view) {
+        Object.values(views).forEach((el) => el.classList.remove("active"));
+        views[view].classList.add("active");
+        body.classList.toggle("evac-mode", view === "evac");
+        window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+        history.replaceState({ view }, "", "#" + view);
+      }
+
+      function showQuakePanel() {
+        ["during-floor", "during-dealer", "after-floor", "after-dealer"].forEach((key) => {
+          const el = document.getElementById("quake-" + key);
+          if (el) el.classList.remove("active");
+        });
+        document.querySelectorAll("[data-quake-role]").forEach((btn) => {
+          btn.classList.toggle("active-role", btn.dataset.quakeRole === quakeRole);
+        });
+        if (!quakeRole) return;
+        const el = document.getElementById("quake-" + quakePhase + "-" + quakeRole);
+        if (el) el.classList.add("active");
+      }
+
+      function showFirePanel() {
+        document.getElementById("fire-floor").classList.toggle("active", fireRole === "floor");
+        document.getElementById("fire-dealer").classList.toggle("active", fireRole === "dealer");
+        document.querySelectorAll("[data-fire-role]").forEach((btn) => {
+          btn.classList.toggle("active-role", btn.dataset.fireRole === fireRole);
+        });
+      }
+
+      function showEvacPanel() {
+        document.getElementById("evac-floor").classList.toggle("active", evacRole === "floor");
+        document.getElementById("evac-dealer").classList.toggle("active", evacRole === "dealer");
+        document.querySelectorAll("[data-evac-role]").forEach((btn) => {
+          btn.classList.toggle("active-role", btn.dataset.evacRole === evacRole);
+        });
+      }
+
+      document.addEventListener("click", (e) => {
+        const goBtn = e.target.closest("[data-go]");
+        if (goBtn) {
+          go(goBtn.dataset.go);
+          return;
+        }
+
+        const qPhase = e.target.closest("[data-quake-phase]");
+        if (qPhase) {
+          quakePhase = qPhase.dataset.quakePhase;
+          document.querySelectorAll("[data-quake-phase]").forEach((btn) => {
+            btn.classList.toggle("active", btn === qPhase);
+          });
+          showQuakePanel();
+          return;
+        }
+
+        const qRole = e.target.closest("[data-quake-role]");
+        if (qRole) {
+          quakeRole = qRole.dataset.quakeRole;
+          showQuakePanel();
+          return;
+        }
+
+        const fRole = e.target.closest("[data-fire-role]");
+        if (fRole) {
+          fireRole = fRole.dataset.fireRole;
+          showFirePanel();
+          return;
+        }
+
+        const eRole = e.target.closest("[data-evac-role]");
+        if (eRole) {
+          evacRole = eRole.dataset.evacRole;
+          showEvacPanel();
+        }
+      });
+
+      const hash = (location.hash || "#home").slice(1);
+      if (views[hash]) go(hash);
+      else go("home");
+    })();
+  </script>
+</body>
+</html>
