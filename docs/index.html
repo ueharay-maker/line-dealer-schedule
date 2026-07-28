@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="deploy-revision" content="2026-07-28-1247" />
+    <meta name="deploy-revision" content="2026-07-28-1250" />
     <title>LINEディーラー募集配信スケジュール</title>
     <style>
       :root {
@@ -1577,6 +1577,7 @@
         { eventId: "sengoku-autumn-2026", ruleId: "early", date: "2026-07-12" },
         { eventId: "sengoku-autumn-2026", ruleId: "fixed-1m", date: "2026-07-27" },
         { eventId: "spadie-42nd-2026", ruleId: "late", date: "2026-07-23" },
+        { eventId: "spadie-42nd-2026", ruleId: "fixed-subsidy-confirm", date: "2026-07-25" },
         { eventId: "jopt-sapporo-02-2026", ruleId: "fixed-1m", date: "2026-07-24" },
         { eventId: "tpc17-2026", ruleId: "fixed-3m", date: "2026-07-08" },
         { eventId: "tpc17-2026", ruleId: "fixed-1m", date: "2026-07-08" },
@@ -2244,6 +2245,7 @@
         "fixed-3m": "一次募集開始",
         "fixed-1m": "遠征補助開始",
         "fixed-3w": "遠征補助・一次募集締切",
+        "fixed-subsidy-confirm": "遠征補助確定配信",
         "fixed-1w": "暫定シフト配信",
         "fixed-3d": "確定シフト配信",
         early: "早期募集",
@@ -2308,6 +2310,7 @@
         { id: "fixed-3m", kind: "fixed", rank: 100, name: "一次募集開始", windowLabel: "3か月前", offset: { unit: "months", value: -3 }, theme: "一次募集開始", shiftRange: 0 },
         { id: "fixed-1m", kind: "fixed", rank: 90, name: "遠征補助開始", windowLabel: "1か月前", offset: { unit: "months", value: -1 }, theme: "遠征補助開始", shiftRange: 0 },
         { id: "fixed-3w", kind: "fixed", rank: 80, name: "遠征補助・一次募集締切", windowLabel: "37日前", offset: { unit: "days", value: -FIXED_3W_DEADLINE_DAYS }, theme: "遠征補助・一次募集締切", shiftRange: 0 },
+        { id: "fixed-subsidy-confirm", kind: "fixed", rank: 75, name: "遠征補助確定配信", windowLabel: "手動", offset: { unit: "days", value: -13 }, theme: "遠征補助確定配信", shiftRange: 0, pinOnly: true },
         { id: "fixed-1w", kind: "fixed", rank: 70, name: "暫定シフト配信", windowLabel: "1週間前", offset: { unit: "days", value: -7 }, theme: "暫定シフト配信", shiftRange: 0 },
         { id: "fixed-3d", kind: "fixed", rank: 60, name: "確定シフト配信", windowLabel: "3日前", offset: { unit: "days", value: -3 }, theme: "確定シフト配信", shiftRange: 0 }
       ];
@@ -2777,6 +2780,7 @@
 
       function renderFixedRules() {
         elements.fixedRuleList.innerHTML = fixedRules
+          .filter((rule) => !rule.pinOnly)
           .map(
             (rule) => `
               <div class="rule-row fixed-row">
@@ -2916,7 +2920,7 @@
 
       function eventFixedRules(event) {
         const skip = new Set(event.skipFixedRules || []);
-        return fixedRules.filter((rule) => !skip.has(rule.id));
+        return fixedRules.filter((rule) => !rule.pinOnly && !skip.has(rule.id));
       }
 
       function getPinnedFixedDate(eventId, ruleId) {
