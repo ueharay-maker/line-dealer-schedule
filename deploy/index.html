@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="deploy-revision" content="2026-07-28-1307" />
+    <meta name="deploy-revision" content="2026-07-28-1654" />
     <title>LINEディーラー募集配信スケジュール</title>
     <style>
       :root {
@@ -1579,6 +1579,7 @@
         { eventId: "sengoku-autumn-2026", ruleId: "fixed-1m", date: "2026-07-27" },
         { eventId: "spadie-42nd-2026", ruleId: "late", date: "2026-07-23" },
         { eventId: "spadie-42nd-2026", ruleId: "fixed-subsidy-confirm", date: "2026-07-25" },
+        { eventId: "spadie-42nd-2026", ruleId: "fixed-1w", date: "2026-07-30" },
         { eventId: "jopt-sapporo-02-2026", ruleId: "fixed-1m", date: "2026-07-24" },
         { eventId: "tpc17-2026", ruleId: "fixed-3m", date: "2026-07-08" },
         { eventId: "tpc17-2026", ruleId: "fixed-1m", date: "2026-07-08" },
@@ -1596,7 +1597,8 @@
         { eventId: "jopt-tokyo-01-2027", ruleId: "fixed-3w", date: "2026-11-17" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "fixed-3m", date: "2026-07-14" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "fixed-1m", date: "2026-07-14" },
-        { eventId: "jopt-tokyo-03-2026", ruleId: "early", date: "2026-07-21" }
+        { eventId: "jopt-tokyo-03-2026", ruleId: "early", date: "2026-07-21" },
+        { eventId: "jopt-tokyo-03-2026", ruleId: "early", date: "2026-07-31" }
       ];
 
       const INTERVAL_ANCHORED_SERIES = [
@@ -2111,6 +2113,53 @@
           row.reasons = ["7/28以降の定期間隔再配置"];
         }
 
+        const usedRowIds = new Set();
+        for (const pin of getAllPinnedAssignments()) {
+          const pinDate = parseInputDate(pin.date);
+          if (!pinDate || pinDate < fromDate) continue;
+          const event = events.find((item) => item.id === pin.eventId);
+          const rule = rules.find((item) => item.id === pin.ruleId);
+          if (!event || !rule || rule.kind !== "interval" || !isEventListed(event)) continue;
+          if (!selectedEvents.some((item) => item.id === event.id)) continue;
+
+          let row = rows.find(
+            (candidate) =>
+              candidate.event.id === pin.eventId &&
+              candidate.rule.id === pin.ruleId &&
+              !candidate.assignedDate &&
+              candidate.status !== "sent" &&
+              !usedRowIds.has(candidate.id)
+          );
+          if (!row) {
+            const phaseStart = resolveOffset(event.startDate, rule.start);
+            const phaseEnd = resolveOffset(event.startDate, rule.end);
+            row = createCandidate(event, rule, pinDate, phaseStart, phaseEnd, rows.length);
+            rows.push(row);
+          }
+          usedRowIds.add(row.id);
+          for (const other of rows) {
+            if (
+              other.id === row.id ||
+              !other.assignedDate ||
+              other.event.lineAccount !== event.lineAccount ||
+              !ACCOUNT_DAY_UNIQUE_IDS.has(event.lineAccount) ||
+              !sameDate(other.assignedDate, pinDate) ||
+              isRowDateLocked(other)
+            ) {
+              continue;
+            }
+            other.assignedDate = null;
+            other.status = "blocked";
+            other.reasons = [...new Set([...(other.reasons || []), "実配信日優先"])];
+          }
+          row.assignedDate = pinDate;
+          row.idealDate = pinDate;
+          row.dateLocked = true;
+          row.anchorSeries = true;
+          row.status = "ok";
+          row.reasons = [...new Set([...(row.reasons || []), "実配信日"])];
+        }
+
         const orderedEvents = [...selectedEvents].sort((a, b) => a.startDate - b.startDate);
 
         for (const event of orderedEvents) {
@@ -2141,11 +2190,40 @@
               if (slot < earliest) slot = earliest;
             }
 
+            const pinnedInPhase = rows
+              .filter(
+                (row) =>
+                  row.event.id === event.id &&
+                  row.rule.id === rule.id &&
+                  row.assignedDate &&
+                  row.status !== "sent" &&
+                  row.assignedDate >= windowStart &&
+                  row.assignedDate <= phaseEnd &&
+                  isRowDateLocked(row)
+              )
+              .sort((a, b) => a.assignedDate - b.assignedDate);
+            let pinIndex = 0;
+
             while (slot <= phaseEnd) {
               if (slot < windowStart) {
                 slot = addDays(slot, 1);
                 continue;
               }
+
+              while (pinIndex < pinnedInPhase.length && pinnedInPhase[pinIndex].assignedDate < slot) {
+                prevDate = pinnedInPhase[pinIndex].assignedDate;
+                pinIndex += 1;
+              }
+              if (pinIndex < pinnedInPhase.length) {
+                const nextPinDate = pinnedInPhase[pinIndex].assignedDate;
+                if (sameDate(slot, nextPinDate) || diffDays(nextPinDate, slot) < rule.interval) {
+                  prevDate = nextPinDate;
+                  slot = addDays(nextPinDate, rule.interval);
+                  pinIndex += 1;
+                  continue;
+                }
+              }
+
               if (shouldSkipPeriodicDate(slot, event, rule, fixedDates)) {
                 slot = addDays(slot, 1);
                 continue;
@@ -2153,6 +2231,20 @@
 
               if (prevDate && diffDays(slot, prevDate) < rule.interval) {
                 slot = addDays(prevDate, rule.interval);
+                continue;
+              }
+
+              const alreadyOnSlot = rows.some(
+                (row) =>
+                  row.event.id === event.id &&
+                  row.rule.id === rule.id &&
+                  row.assignedDate &&
+                  row.status !== "sent" &&
+                  sameDate(row.assignedDate, slot)
+              );
+              if (alreadyOnSlot) {
+                prevDate = slot;
+                slot = addDays(slot, rule.interval);
                 continue;
               }
 
