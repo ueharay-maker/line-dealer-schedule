@@ -22,12 +22,11 @@
       --orange-deep: #b33a12;
       --red: #d41818;
       --red-deep: #8a0c0c;
-      --warn: #ff3b30;
-      --ok: #2f9e6b;
       --safe-pad: env(safe-area-inset-bottom, 0px);
       --top-pad: env(safe-area-inset-top, 0px);
       --font-display: "Archivo Black", "Zen Kaku Gothic New", sans-serif;
       --font-body: "Zen Kaku Gothic New", sans-serif;
+      --jump-h: 72px;
     }
 
     * { box-sizing: border-box; }
@@ -82,11 +81,7 @@
       50% { background-position: 100% 50%; }
     }
 
-    /* —— Home —— */
-    .brand {
-      text-align: center;
-      margin-bottom: 22px;
-    }
+    .brand { text-align: center; margin-bottom: 22px; }
     .brand img {
       width: 72px;
       height: auto;
@@ -116,10 +111,7 @@
       letter-spacing: 0.02em;
     }
 
-    .home-actions {
-      display: grid;
-      gap: 14px;
-    }
+    .home-actions { display: grid; gap: 14px; }
 
     .mode-btn {
       display: grid;
@@ -165,16 +157,9 @@
       border: 2px solid rgba(255, 220, 220, 0.35);
       animation: pulse-glow 2.2s ease-in-out infinite;
     }
-    .mode-btn.evac .label {
-      font-size: 2.15rem;
-      letter-spacing: 0.02em;
-    }
-    .mode-btn.evac .sub {
-      font-size: 1.08rem;
-      font-weight: 900;
-    }
+    .mode-btn.evac .label { font-size: 2.15rem; letter-spacing: 0.02em; }
+    .mode-btn.evac .sub { font-size: 1.08rem; font-weight: 900; }
 
-    /* —— Shared page chrome —— */
     .page-head {
       display: flex;
       align-items: flex-start;
@@ -189,9 +174,7 @@
       letter-spacing: 0.02em;
       line-height: 1.2;
     }
-    .page-title.huge {
-      font-size: clamp(1.7rem, 7vw, 2.15rem);
-    }
+    .page-title.huge { font-size: clamp(1.7rem, 7vw, 2.15rem); }
     .back-btn {
       flex-shrink: 0;
       padding: 10px 14px;
@@ -210,7 +193,7 @@
 
     .lead-warn {
       margin: 0 0 18px;
-      padding: 16px 16px;
+      padding: 16px;
       border-radius: 14px;
       background: rgba(212, 24, 24, 0.18);
       border: 1px solid rgba(255, 80, 80, 0.45);
@@ -289,9 +272,7 @@
       color: #d7dde8;
       font-size: 0.95rem;
     }
-    .do-item ul {
-      padding-left: 1.1em;
-    }
+    .do-item ul { padding-left: 1.1em; }
     .do-item li + li { margin-top: 4px; }
     .quotes {
       margin: 8px 0 0;
@@ -301,8 +282,8 @@
       font-weight: 700;
       color: #fff;
     }
-    .quotes li { margin: 0; list-style: none; }
     .quotes ul { margin: 0; padding: 0; list-style: none; }
+    .quotes li { margin: 0; list-style: none; }
     .quotes li + li { margin-top: 4px; }
 
     .dont {
@@ -324,6 +305,18 @@
       font-weight: 700;
     }
     .dont li + li { margin-top: 6px; }
+    .dont .strong-line {
+      list-style: none;
+      margin-left: -1.15em;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(212, 24, 24, 0.28);
+      border: 1px solid rgba(255, 140, 140, 0.45);
+      font-size: 1.02rem;
+      font-weight: 900;
+      color: #fff;
+    }
 
     .order {
       margin: 8px 0 16px;
@@ -345,6 +338,13 @@
       font-weight: 900;
       line-height: 1;
     }
+    .order-note {
+      margin: 14px 0 0;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--muted);
+      line-height: 1.4;
+    }
 
     .danger-box {
       margin: 0 0 18px;
@@ -364,6 +364,18 @@
       font-size: 1.02rem;
     }
     .danger-box p + p { margin-top: 10px; }
+    .danger-box ul {
+      margin: 10px 0 0;
+      padding-left: 1.15em;
+      font-weight: 700;
+    }
+    .danger-box li + li { margin-top: 4px; }
+    .danger-box .final {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,180,180,0.35);
+      font-size: 1.08rem;
+    }
 
     .after-box {
       padding: 16px;
@@ -403,26 +415,30 @@
       border-color: rgba(255,255,255,0.35);
     }
 
+    /* Demoted supplementary photo card */
     .photo-box {
-      margin: 0 0 18px;
-      padding: 16px;
-      border-radius: 14px;
-      background: rgba(47, 158, 107, 0.12);
-      border: 1px solid rgba(47, 158, 107, 0.35);
+      margin: 4px 0 18px;
+      padding: 14px 14px 14px 16px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed rgba(255,255,255,0.18);
+      opacity: 0.88;
     }
     .photo-box h3 {
       margin: 0 0 8px;
-      font-weight: 900;
-      font-size: 1.02rem;
-      color: #9be7c2;
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
     }
-    .photo-box ol {
+    .photo-box ul, .photo-box ol {
       margin: 0;
-      padding-left: 1.2em;
+      padding-left: 1.15em;
       font-weight: 700;
-      color: #d7dde8;
+      font-size: 0.9rem;
+      color: #b8c0cc;
     }
-    .photo-box li + li { margin-top: 6px; }
+    .photo-box li + li { margin-top: 5px; }
 
     .note {
       margin: 0 0 14px;
@@ -431,7 +447,60 @@
       font-weight: 700;
     }
 
-    /* Fixed evacuate warning bar */
+    .flow-mini {
+      margin: 0 0 16px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--line);
+      font-weight: 800;
+      font-size: 0.92rem;
+      text-align: center;
+      line-height: 1.7;
+      color: #d7dde8;
+    }
+
+    .quake-after-warn { display: none; }
+    body.show-quake-after-warn .quake-after-warn { display: block; }
+
+    /* Fixed jump-to-evac on quake/fire only */
+    .evac-jump {
+      display: none;
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(10px + var(--safe-pad));
+      z-index: 60;
+      width: min(448px, calc(100% - 24px));
+      min-height: var(--jump-h);
+      padding: 12px 16px;
+      border-radius: 16px;
+      background: linear-gradient(160deg, #ff2a2a 0%, var(--red) 45%, var(--red-deep) 100%);
+      color: #fff;
+      box-shadow: 0 10px 28px rgba(212, 24, 24, 0.45);
+      border: 2px solid rgba(255, 220, 220, 0.4);
+      text-align: center;
+      line-height: 1.2;
+    }
+    .evac-jump .jl {
+      display: block;
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+    .evac-jump .js {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      opacity: 0.95;
+    }
+    body.detail-mode .evac-jump { display: block; }
+    body.detail-mode .app {
+      padding-bottom: calc(28px + var(--jump-h) + 18px + var(--safe-pad));
+    }
+
+    /* Evac bottom warning bar */
     .evac-bar {
       display: none;
       position: fixed;
@@ -454,6 +523,7 @@
     body.evac-mode .app {
       padding-bottom: calc(78px + var(--safe-pad));
     }
+    body.evac-mode .evac-jump { display: none !important; }
 
     .divider {
       height: 1px;
@@ -461,7 +531,10 @@
       margin: 22px 0;
     }
 
-    .hidden { display: none !important; }
+    .emphasis {
+      font-weight: 900;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -501,6 +574,21 @@
       <div class="phase-tabs" role="tablist">
         <button type="button" class="phase-tab active" data-quake-phase="during">揺れている間</button>
         <button type="button" class="phase-tab" data-quake-phase="after">揺れが収まった後</button>
+      </div>
+
+      <div class="danger-box quake-after-warn" id="quake-after-warn">
+        <h3>🚨 危険がある場合</h3>
+        <p>撮影・確認・記録をせず、<br>直ちに安全確保・避難を優先してください。</p>
+        <p>以下の場合は撮影しない：</p>
+        <ul>
+          <li>避難指示が出ている</li>
+          <li>煙、炎がある</li>
+          <li>落下物や設備破損の危険がある</li>
+          <li>余震等で安全が確保できない</li>
+          <li>避難経路が混雑している</li>
+          <li>少しでも危険を感じる</li>
+        </ul>
+        <p class="final"><strong>迷ったら撮影しない。避難を優先。</strong></p>
       </div>
 
       <div class="section-label">あなたは？</div>
@@ -569,31 +657,33 @@
         <ul class="do-list">
           <li class="do-item">
             <h3>① 担当エリアの安全確認</h3>
-            <p>天井・照明・サイネージ・テーブル・負傷者・煙の有無を確認し、責任者へ報告。</p>
+            <p>天井・照明・サイネージ・テーブル・負傷者・煙の有無を確認する。</p>
           </li>
           <li class="do-item">
-            <h3>② プレイヤーへ待機案内</h3>
+            <h3>② プレイヤーへの待機案内</h3>
             <div class="quotes"><ul>
               <li>「着席のまま待機してください」</li>
               <li>「スタッフの指示に従ってください」</li>
             </ul></div>
           </li>
           <li class="do-item">
-            <h3>③ 避難指示が出たら誘導へ切替</h3>
-            <p>避難が必要になったら、トップの「今すぐ避難」に従う。</p>
+            <h3>③ 状況を責任者へ報告</h3>
+            <p>損傷・負傷者・煙などの有無を簡潔に伝える。</p>
           </li>
           <li class="do-item">
-            <h3>④ ディーラーの状況を確認</h3>
-            <p>安全な範囲で声かけ。危険があれば確認のために残らない。</p>
+            <h3>④ 避難指示が出たら避難誘導へ切り替える</h3>
+            <p>危険を感じたら指示を待たず、下部の「今すぐ避難」へ。</p>
           </li>
         </ul>
         <div class="photo-box">
-          <h3>チップスタック撮影（安全な待機時のみ）</h3>
-          <ol>
-            <li>トナメ担、TDから「待機・再開準備」の指示がある場合のみ実施</li>
-            <li>ディーラーへ撮影を依頼し、卓全体が映るように写真を取って記録</li>
-            <li>避難指示・危険を感じたら撮影を中止し避難</li>
-          </ol>
+          <h3>補足｜安全が確保されている場合のみ</h3>
+          <ul>
+            <li>トナメ担・TDから指示がある場合のみ実施</li>
+            <li>卓全体、各プレイヤーのチップスタック、必要な情報が確認できるよう撮影</li>
+            <li>避難指示が出た場合は実施しない</li>
+            <li>危険を感じた場合は途中でも中止する</li>
+            <li>撮影のために避難を遅らせない</li>
+          </ul>
         </div>
         <div class="dont">
           <h3>やってはいけないこと</h3>
@@ -601,6 +691,7 @@
             <li>危険箇所へプレイヤーを近づけない</li>
             <li>エレベーターを使わせない</li>
             <li>撮影のために避難を遅らせない</li>
+            <li>チップ・機材を守るために危険な場所へ残らない・戻らない</li>
           </ul>
         </div>
       </div>
@@ -609,28 +700,34 @@
         <h3 class="section-label">ディーラー：今やること</h3>
         <ul class="do-list">
           <li class="do-item">
-            <h3>① プレイヤーへ待機案内</h3>
+            <h3>① プレイヤーへの待機案内</h3>
             <div class="quotes"><ul>
               <li>「着席のままお待ちください」</li>
               <li>「スタッフの指示に従ってください」</li>
             </ul></div>
           </li>
           <li class="do-item">
-            <h3>② 指示があるまでゲームを再開しない</h3>
-            <p>フロア／責任者の指示を待つ。</p>
+            <h3>② フロア・責任者の指示を確認</h3>
+            <p>独断で動かず、フロア／責任者の案内に従う。</p>
           </li>
           <li class="do-item">
-            <h3>③ 避難指示が出たら直ちに避難</h3>
-            <p>トップの「今すぐ避難」に従う。</p>
+            <h3>③ 指示があるまでゲームを再開しない</h3>
+            <p>再開の合図があるまで待機する。</p>
+          </li>
+          <li class="do-item">
+            <h3>④ 避難指示が出たら避難行動へ切り替える</h3>
+            <p>危険を感じたら下部の「今すぐ避難」へ。</p>
           </li>
         </ul>
         <div class="photo-box">
-          <h3>チップスタック撮影方法（安全な待機時のみ）</h3>
-          <ol>
-            <li>トナメ担、TDから「待機・再開準備」の指示がある場合のみ実施</li>
-            <li>各プレイヤーのスタックが分かるように卓全体、トーナメントクロックを撮影</li>
-            <li>避難指示が出ている／危険を感じる場合は撮影しない</li>
-          </ol>
+          <h3>補足｜安全が確保されている場合のみ</h3>
+          <ul>
+            <li>トナメ担・TDから指示がある場合のみ実施</li>
+            <li>卓全体、各プレイヤーのチップスタック、必要な情報が確認できるよう撮影</li>
+            <li>避難指示が出た場合は実施しない</li>
+            <li>危険を感じた場合は途中でも中止する</li>
+            <li>撮影のために避難を遅らせない</li>
+          </ul>
         </div>
         <div class="dont">
           <h3>やってはいけないこと</h3>
@@ -652,6 +749,9 @@
       <p class="lead-warn" style="background:rgba(227,101,32,.18);border-color:rgba(240,120,32,.45)">
         <strong>煙・炎・火災を確認したら、自分と周囲の安全を確保したうえで直ちに報告してください。</strong>
       </p>
+      <div class="flow-mini">
+        安全確保 → 注意喚起 → 責任者へ報告 → 避難指示が出たら避難誘導
+      </div>
 
       <div class="section-label">あなたは？</div>
       <div class="role-grid">
@@ -663,39 +763,35 @@
         <h3 class="section-label">フロア：今やること</h3>
         <ul class="do-list">
           <li class="do-item fire-accent">
-            <h3>① 周囲へ注意喚起し報告</h3>
-            <p>「火事です」等を声かけ。責任者・ディレクターへ場所と状況を報告。</p>
+            <h3>① 自身と周囲の安全確保</h3>
+            <p>煙・炎から距離を取る。火元確認や消火のために危険な場所へ向かわない。</p>
           </li>
           <li class="do-item fire-accent">
-            <h3>② 初期消火は安全な範囲のみ</h3>
-            <p>退路を確保できる小規模火災に限る。危険なら消火に固執せず避難誘導へ切替。</p>
+            <h3>② 周囲への注意喚起</h3>
+            <p>「火事です」等を声かけし、周囲に周知する。</p>
           </li>
           <li class="do-item fire-accent">
-            <h3>③ 避難誘導</h3>
+            <h3>③ 責任者へ報告</h3>
+            <p>場所と状況（煙・炎・負傷者の有無）を責任者・ディレクターへ直ちに伝える。</p>
+          </li>
+          <li class="do-item fire-accent">
+            <h3>④ 避難指示が出たら避難誘導</h3>
             <div class="quotes"><ul>
               <li>「落ち着いてください」</li>
               <li>「走らないでください」</li>
               <li>「階段をご利用ください」</li>
               <li>「スタッフの誘導に従ってください」</li>
             </ul></div>
-          </li>
-          <li class="do-item fire-accent">
-            <h3>④ 非常口・階段へ誘導</h3>
-            <p>エレベーターは使用させない。殺到・押し合いを防ぐ。</p>
+            <p style="margin-top:8px">非常口・階段へ誘導。エレベーターは使用させない。殺到・押し合いを防ぐ。自身も速やかに避難。</p>
           </li>
         </ul>
-        <div class="photo-box">
-          <h3>チップスタック撮影について</h3>
-          <ol>
-            <li>火災・煙がある状況では撮影しない</li>
-            <li>避難が必要な場面ではチップ・カードはそのまま</li>
-            <li>撮影より避難を優先</li>
-          </ol>
-        </div>
         <div class="dont">
           <h3>やってはいけないこと</h3>
           <ul>
-            <li>炎が天井付近・煙が急速拡大・消火器1本で止められない場合に消火を続けない</li>
+            <li>チップスタック撮影をしない</li>
+            <li>チップ・カードを整理しない</li>
+            <li>機材を回収しない</li>
+            <li>私物を取りに戻らない</li>
             <li>危険な場所へ残らない・戻らない</li>
             <li>プレイヤーをエレベーターへ誘導しない</li>
           </ul>
@@ -706,30 +802,32 @@
         <h3 class="section-label">ディーラー：今やること</h3>
         <ul class="do-list">
           <li class="do-item fire-accent">
-            <h3>① プレイヤーへ避難を案内</h3>
+            <h3>① 自身の安全確保</h3>
+            <p>煙・炎から離れ、フロアの指示を待つ／従う。</p>
+          </li>
+          <li class="do-item fire-accent">
+            <h3>② プレイヤーへ避難を案内</h3>
             <div class="quotes"><ul>
               <li>「スタッフの誘導に従ってください」</li>
             </ul></div>
           </li>
           <li class="do-item fire-accent">
-            <h3>② チップ・カードの整理をしない</h3>
-            <p>火災時はそのままにし、避難を優先。</p>
-          </li>
-          <li class="do-item fire-accent">
-            <h3>③ 撮影より避難を優先</h3>
-            <p>煙・炎・避難指示がある場合はチップスタック撮影を行わない。</p>
+            <h3>③ チップ・カードはそのままにする</h3>
+            <p>整理・撮影せず、避難を優先する。</p>
           </li>
           <li class="do-item fire-accent">
             <h3>④ 案内したら自身も避難</h3>
-            <p>フロアの誘導に従い、非常口・階段へ移動。</p>
+            <p>フロアの誘導に従い、非常口・階段へ移動する。</p>
           </li>
         </ul>
         <div class="dont">
           <h3>やってはいけないこと</h3>
           <ul>
+            <li>チップスタック撮影をしない</li>
+            <li>チップ・カードを整理しない</li>
+            <li>機材を回収しない</li>
             <li>チップ・カード・スマホ・バッグを取りに戻らない</li>
             <li>エレベーターを使わない</li>
-            <li>撮影・確認のために避難を遅らせない</li>
           </ul>
         </div>
       </div>
@@ -743,8 +841,8 @@
       </div>
 
       <div class="lead-warn">
-        <p>チップ・カード・機材・私物より人命を優先してください。</p>
-        <p>撮影・確認・記録のために避難を遅らせないでください。</p>
+        <p>【チップ・カード・機材・私物より人命を優先】</p>
+        <p>【撮影・確認・記録のために避難を遅らせない】</p>
       </div>
 
       <div class="section-label">あなたは？</div>
@@ -767,19 +865,23 @@
           </li>
           <li class="do-item evac-accent">
             <h3>② 非常口・階段へ誘導</h3>
-            <p>エレベーターは使用させない。<br>出口への殺到や押し合いを防ぎながら誘導する。</p>
+            <p>最寄りの非常口・階段へ案内する。</p>
           </li>
           <li class="do-item evac-accent">
-            <h3>③ 担当エリアからプレイヤーを退避させる</h3>
-            <p>安全な範囲で周囲へ声をかけながら避難誘導する。</p>
+            <h3>③ エレベーターを使用させない</h3>
+            <p>階段のみを案内する。</p>
           </li>
           <li class="do-item evac-accent">
-            <h3>④ ディーラーの退避を確認</h3>
-            <p>ただし、自分自身に危険が迫っている場合は確認のために残らない。</p>
+            <h3>④ 走らせない・押し合いを防ぐ</h3>
+            <p>出口への殺到を抑えながら誘導する。</p>
           </li>
           <li class="do-item evac-accent">
-            <h3>⑤ 自身も速やかに避難</h3>
-            <p><strong>危険な場所へ残らない・戻らない。</strong></p>
+            <h3>⑤ 安全な範囲でディーラーの退避を確認</h3>
+            <p class="emphasis">自分に危険が迫っている場合、確認のために残らない。</p>
+          </li>
+          <li class="do-item evac-accent">
+            <h3>⑥ 自身も速やかに避難</h3>
+            <p class="emphasis">取り残された人の確認のために危険区域へ戻らない。</p>
           </li>
         </ul>
         <div class="dont">
@@ -788,6 +890,7 @@
             <li>チップ・カード・機材の整理・回収</li>
             <li>撮影・確認・記録のための残留</li>
             <li>危険な場所への再進入</li>
+            <li class="strong-line">確認のために危険区域へ残らない・戻らない</li>
           </ul>
         </div>
       </div>
@@ -802,25 +905,26 @@
             </ul></div>
           </li>
           <li class="do-item evac-accent">
-            <h3>② チップ・カードの整理をしない</h3>
-            <p>避難が必要な状況では、そのままにする。</p>
+            <h3>② チップ・カードを整理しない</h3>
+            <p class="emphasis">そのままにして避難する。</p>
           </li>
           <li class="do-item evac-accent">
-            <h3>③ 撮影より避難を優先</h3>
-            <p>避難指示が出ている場合や危険が迫っている場合は、チップスタックの撮影を行わない。</p>
+            <h3>③ チップスタックを撮影しない</h3>
+            <p class="emphasis">撮影より避難を優先する。</p>
           </li>
           <li class="do-item evac-accent">
-            <h3>④ プレイヤーの避難を案内したら自身も避難</h3>
-            <p>フロアの誘導に従い、非常口・階段へ移動する。</p>
+            <h3>④ フロアの誘導に従って避難</h3>
+            <p>非常口・階段へ移動する。</p>
           </li>
           <li class="do-item evac-accent">
-            <h3>⑤ 絶対に戻らない</h3>
-            <p>チップ、カード、スマートフォン、バッグ等を取りに会場へ戻らない。</p>
+            <h3>⑤ 荷物・スマートフォン等を取りに戻らない</h3>
+            <p class="emphasis">絶対に会場へ戻らない。</p>
           </li>
         </ul>
         <div class="dont">
           <h3>やってはいけないこと</h3>
           <ul>
+            <li class="strong-line">撮影しない　／　整理しない　／　戻らない</li>
             <li>チップ・カードの整理</li>
             <li>チップスタック撮影</li>
             <li>私物を取りに戻ること</li>
@@ -837,6 +941,7 @@
         <div class="order-step">ディーラー</div>
         <div class="order-arrow">↓</div>
         <div class="order-step">フロア</div>
+        <p class="order-note">※ フロアが最後まで危険な場所に残る必要はありません。安全な範囲での誘導後、自身も避難してください。</p>
       </div>
 
       <div class="danger-box">
@@ -858,6 +963,11 @@
     </section>
   </div>
 
+  <button type="button" class="evac-jump" data-go="evac" aria-label="今すぐ避難">
+    <span class="jl">🚨 今すぐ避難</span>
+    <span class="js">避難指示・危険が迫っている</span>
+  </button>
+
   <div class="evac-bar" role="status">🚨 危険を感じたら指示を待たず安全確保</div>
 
   <script>
@@ -875,10 +985,16 @@
       let fireRole = null;
       let evacRole = null;
 
+      function updateQuakeAfterWarn() {
+        body.classList.toggle("show-quake-after-warn", views.quake.classList.contains("active") && quakePhase === "after");
+      }
+
       function go(view) {
         Object.values(views).forEach((el) => el.classList.remove("active"));
         views[view].classList.add("active");
         body.classList.toggle("evac-mode", view === "evac");
+        body.classList.toggle("detail-mode", view === "quake" || view === "fire");
+        updateQuakeAfterWarn();
         window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
         history.replaceState({ view }, "", "#" + view);
       }
@@ -891,6 +1007,7 @@
         document.querySelectorAll("[data-quake-role]").forEach((btn) => {
           btn.classList.toggle("active-role", btn.dataset.quakeRole === quakeRole);
         });
+        updateQuakeAfterWarn();
         if (!quakeRole) return;
         const el = document.getElementById("quake-" + quakePhase + "-" + quakeRole);
         if (el) el.classList.add("active");
