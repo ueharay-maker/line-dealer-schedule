@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0c1017" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta name="deploy-revision" content="2026-07-29-ref-table" />
   <title>JOPT 緊急対応マニュアル</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -318,68 +321,113 @@
       color: #fff;
     }
 
-    /* Reference-style order table (like floor/dealer ref) */
-    .order-ref {
+    /* Reference-style order table (matches floor/dealer ref) */
+    .ref-card {
       margin: 8px 0 16px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.04);
+      padding: 16px;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #1f2937;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
     }
-    .order-ref-head {
-      display: grid;
-      grid-template-columns: 48px 1fr 1.4fr;
-      gap: 8px;
-      padding: 10px 14px;
-      background: rgba(29, 111, 216, 0.28);
-      border-bottom: 1px solid rgba(255,255,255,0.14);
-      font-size: 0.78rem;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      color: #c8d6ea;
-      text-transform: none;
+    .ref-card h4 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #005BA0;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #ddd;
     }
-    .order-ref-row {
-      display: grid;
-      grid-template-columns: 48px 1fr 1.4fr;
-      gap: 8px;
-      align-items: center;
-      padding: 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+    .ref-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0;
     }
-    .order-ref-row:last-of-type { border-bottom: 0; }
-    .order-num {
+    .ref-table th,
+    .ref-table td {
+      border: 1px solid #ddd;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      text-align: left;
+      vertical-align: middle;
+    }
+    .ref-table th {
+      background: #005BA0;
+      color: #fff;
+      font-weight: 700;
+    }
+    .ref-table tr:nth-child(even) td { background: #f5f5f5; }
+    .ref-table .num {
+      width: 3.2em;
+      text-align: center;
+      font-weight: 700;
+      color: #005BA0;
+    }
+    .ref-table .role {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .ref-note {
+      margin: 12px 0 0;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #666;
+      line-height: 1.45;
+    }
+    .ref-alert {
+      margin-top: 12px;
+      border: 2px solid #E53935;
+      background: #ffebee;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .ref-alert strong {
+      display: block;
+      color: #E53935;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+    .ref-alert p {
+      margin: 0;
+      color: #E53935;
+      font-weight: 700;
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+    .ref-alert p + p { margin-top: 6px; }
+
+    .ref-steps {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      counter-reset: refstep;
+    }
+    .ref-steps li {
+      counter-increment: refstep;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1f2937;
+      line-height: 1.45;
+    }
+    .ref-steps li:last-child { margin-bottom: 0; }
+    .ref-steps li::before {
+      content: counter(refstep);
+      flex-shrink: 0;
       width: 28px;
       height: 28px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--blue);
+      background: #005BA0;
       color: #fff;
-      font-size: 0.85rem;
-      font-weight: 900;
-    }
-    .order-role {
-      font-size: 1.05rem;
-      font-weight: 900;
-      letter-spacing: 0.04em;
-    }
-    .order-action {
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       font-weight: 700;
-      color: #d7dde8;
-      line-height: 1.4;
-    }
-    .order-note {
-      margin: 0;
-      padding: 12px 14px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--muted);
-      line-height: 1.45;
-      background: rgba(0,0,0,0.18);
+      margin-top: 0;
     }
 
     .danger-box {
@@ -483,56 +531,7 @@
       font-weight: 700;
     }
 
-    .flow-ref {
-      margin: 0 0 16px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid rgba(240, 120, 32, 0.35);
-      background: rgba(227, 101, 32, 0.08);
-    }
-    .flow-ref-title {
-      margin: 0;
-      padding: 10px 14px;
-      font-size: 0.82rem;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      color: #ffc49a;
-      background: rgba(227, 101, 32, 0.18);
-      border-bottom: 1px solid rgba(240, 120, 32, 0.28);
-    }
-    .flow-ref ol {
-      list-style: none;
-      margin: 0;
-      padding: 8px 0;
-      counter-reset: flowstep;
-    }
-    .flow-ref li {
-      counter-increment: flowstep;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      padding: 10px 14px;
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #f0e6dc;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .flow-ref li:last-child { border-bottom: 0; }
-    .flow-ref li::before {
-      content: counter(flowstep);
-      flex-shrink: 0;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f07820;
-      color: #fff;
-      font-size: 0.8rem;
-      font-weight: 900;
-      margin-top: 1px;
-    }
+
 
     .quake-after-warn { display: none; }
     body.show-quake-after-warn .quake-after-warn { display: block; }
@@ -823,9 +822,9 @@
       <p class="lead-warn" style="background:rgba(227,101,32,.18);border-color:rgba(240,120,32,.45)">
         <strong>煙・炎・火災を確認したら、自分と周囲の安全を確保したうえで直ちに報告してください。</strong>
       </p>
-      <div class="flow-ref">
-        <p class="flow-ref-title">火災発見時の基本フロー</p>
-        <ol>
+      <div class="ref-card">
+        <h4>火災発見時の基本フロー</h4>
+        <ol class="ref-steps">
           <li>安全確保</li>
           <li>周囲への注意喚起</li>
           <li>責任者へ報告</li>
@@ -1015,34 +1014,40 @@
       <div class="divider"></div>
 
       <h3 class="section-label">避難順序</h3>
-      <div class="order-ref" aria-label="避難順序">
-        <div class="order-ref-head">
-          <span>順序</span>
-          <span>役割</span>
-          <span>行動</span>
+      <div class="ref-card" aria-label="避難順序">
+        <h4>避難の目安順序</h4>
+        <table class="ref-table">
+          <thead>
+            <tr>
+              <th class="num">#</th>
+              <th>役割</th>
+              <th>行動</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="num">1</td>
+              <td class="role">プレイヤー</td>
+              <td>先に避難する</td>
+            </tr>
+            <tr>
+              <td class="num">2</td>
+              <td class="role">ディーラー</td>
+              <td>案内後、自身も避難</td>
+            </tr>
+            <tr>
+              <td class="num">3</td>
+              <td class="role">フロア</td>
+              <td>誘導後、自身も避難</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="ref-note">※ フロアが最後まで危険な場所に残る必要はありません。安全な範囲での誘導後、自身も避難してください。</p>
+        <div class="ref-alert">
+          <strong>⚠️ 危険が迫っている場合</strong>
+          <p>この順番にこだわらず、全員直ちに避難してください。</p>
+          <p>取り残された人の確認や撮影のために危険な場所へ戻らないでください。</p>
         </div>
-        <div class="order-ref-row">
-          <span class="order-num">1</span>
-          <span class="order-role">プレイヤー</span>
-          <span class="order-action">先に避難する</span>
-        </div>
-        <div class="order-ref-row">
-          <span class="order-num">2</span>
-          <span class="order-role">ディーラー</span>
-          <span class="order-action">案内後、自身も避難</span>
-        </div>
-        <div class="order-ref-row">
-          <span class="order-num">3</span>
-          <span class="order-role">フロア</span>
-          <span class="order-action">誘導後、自身も避難</span>
-        </div>
-        <p class="order-note">※ フロアが最後まで危険な場所に残る必要はありません。安全な範囲での誘導後、自身も避難してください。</p>
-      </div>
-
-      <div class="danger-box">
-        <h3>⚠️ 危険が迫っている場合</h3>
-        <p>この順番にこだわらず、全員直ちに避難してください。</p>
-        <p>取り残された人の確認や撮影のために危険な場所へ戻らないでください。</p>
       </div>
 
       <div class="after-box">
