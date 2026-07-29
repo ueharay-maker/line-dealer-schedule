@@ -318,32 +318,68 @@
       color: #fff;
     }
 
-    .order {
+    /* Reference-style order table (like floor/dealer ref) */
+    .order-ref {
       margin: 8px 0 16px;
-      padding: 22px 16px;
-      border-radius: 18px;
-      text-align: center;
-      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      overflow: hidden;
       border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
     }
-    .order-step {
-      font-size: 1.55rem;
-      font-weight: 900;
+    .order-ref-head {
+      display: grid;
+      grid-template-columns: 48px 1fr 1.4fr;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(29, 111, 216, 0.28);
+      border-bottom: 1px solid rgba(255,255,255,0.14);
+      font-size: 0.78rem;
+      font-weight: 800;
       letter-spacing: 0.06em;
+      color: #c8d6ea;
+      text-transform: none;
     }
-    .order-arrow {
-      margin: 6px 0;
-      font-size: 1.4rem;
-      color: #ffe3a8;
+    .order-ref-row {
+      display: grid;
+      grid-template-columns: 48px 1fr 1.4fr;
+      gap: 8px;
+      align-items: center;
+      padding: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .order-ref-row:last-of-type { border-bottom: 0; }
+    .order-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--blue);
+      color: #fff;
+      font-size: 0.85rem;
       font-weight: 900;
-      line-height: 1;
+    }
+    .order-role {
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+    .order-action {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #d7dde8;
+      line-height: 1.4;
     }
     .order-note {
-      margin: 14px 0 0;
-      font-size: 0.88rem;
+      margin: 0;
+      padding: 12px 14px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.85rem;
       font-weight: 700;
       color: var(--muted);
-      line-height: 1.4;
+      line-height: 1.45;
+      background: rgba(0,0,0,0.18);
     }
 
     .danger-box {
@@ -447,17 +483,55 @@
       font-weight: 700;
     }
 
-    .flow-mini {
+    .flow-ref {
       margin: 0 0 16px;
-      padding: 12px 14px;
       border-radius: 12px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--line);
+      overflow: hidden;
+      border: 1px solid rgba(240, 120, 32, 0.35);
+      background: rgba(227, 101, 32, 0.08);
+    }
+    .flow-ref-title {
+      margin: 0;
+      padding: 10px 14px;
+      font-size: 0.82rem;
       font-weight: 800;
-      font-size: 0.92rem;
-      text-align: center;
-      line-height: 1.7;
-      color: #d7dde8;
+      letter-spacing: 0.04em;
+      color: #ffc49a;
+      background: rgba(227, 101, 32, 0.18);
+      border-bottom: 1px solid rgba(240, 120, 32, 0.28);
+    }
+    .flow-ref ol {
+      list-style: none;
+      margin: 0;
+      padding: 8px 0;
+      counter-reset: flowstep;
+    }
+    .flow-ref li {
+      counter-increment: flowstep;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #f0e6dc;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .flow-ref li:last-child { border-bottom: 0; }
+    .flow-ref li::before {
+      content: counter(flowstep);
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f07820;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 900;
+      margin-top: 1px;
     }
 
     .quake-after-warn { display: none; }
@@ -749,8 +823,14 @@
       <p class="lead-warn" style="background:rgba(227,101,32,.18);border-color:rgba(240,120,32,.45)">
         <strong>煙・炎・火災を確認したら、自分と周囲の安全を確保したうえで直ちに報告してください。</strong>
       </p>
-      <div class="flow-mini">
-        安全確保 → 注意喚起 → 責任者へ報告 → 避難指示が出たら避難誘導
+      <div class="flow-ref">
+        <p class="flow-ref-title">火災発見時の基本フロー</p>
+        <ol>
+          <li>安全確保</li>
+          <li>周囲への注意喚起</li>
+          <li>責任者へ報告</li>
+          <li>避難指示が出たら避難誘導</li>
+        </ol>
       </div>
 
       <div class="section-label">あなたは？</div>
@@ -935,12 +1015,27 @@
       <div class="divider"></div>
 
       <h3 class="section-label">避難順序</h3>
-      <div class="order" aria-label="避難順序">
-        <div class="order-step">プレイヤー</div>
-        <div class="order-arrow">↓</div>
-        <div class="order-step">ディーラー</div>
-        <div class="order-arrow">↓</div>
-        <div class="order-step">フロア</div>
+      <div class="order-ref" aria-label="避難順序">
+        <div class="order-ref-head">
+          <span>順序</span>
+          <span>役割</span>
+          <span>行動</span>
+        </div>
+        <div class="order-ref-row">
+          <span class="order-num">1</span>
+          <span class="order-role">プレイヤー</span>
+          <span class="order-action">先に避難する</span>
+        </div>
+        <div class="order-ref-row">
+          <span class="order-num">2</span>
+          <span class="order-role">ディーラー</span>
+          <span class="order-action">案内後、自身も避難</span>
+        </div>
+        <div class="order-ref-row">
+          <span class="order-num">3</span>
+          <span class="order-role">フロア</span>
+          <span class="order-action">誘導後、自身も避難</span>
+        </div>
         <p class="order-note">※ フロアが最後まで危険な場所に残る必要はありません。安全な範囲での誘導後、自身も避難してください。</p>
       </div>
 
