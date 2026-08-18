@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="deploy-revision" content="2026-08-18-1714" />
+    <meta name="deploy-revision" content="2026-08-18-1841" />
     <title>LINEディーラー募集配信スケジュール</title>
     <style>
       :root {
@@ -1593,9 +1593,16 @@
         { eventId: "jopt-osaka-02-2026", ruleId: "early", date: "2026-08-19" },
         { eventId: "jopt-osaka-02-2026", ruleId: "early", date: "2026-08-25" },
         { eventId: "tpc17-2026", ruleId: "late", date: "2026-08-27" },
-        { eventId: "spadie-43rd-2026", ruleId: "fixed-3m", date: "2026-08-19" },
-        { eventId: "spadie-43rd-2026", ruleId: "fixed-1m", date: "2026-08-19" },
+        { eventId: "spadie-43rd-2026", ruleId: "fixed-3m", date: "2026-08-25" },
+        { eventId: "spadie-43rd-2026", ruleId: "fixed-1m", date: "2026-08-25" },
         { eventId: "spadie-43rd-2026", ruleId: "fixed-3w", date: "2026-10-13" },
+        { eventId: "spadie-43rd-2026", ruleId: "early", date: "2026-09-01" },
+        { eventId: "spadie-43rd-2026", ruleId: "early", date: "2026-09-08" },
+        { eventId: "spadie-43rd-2026", ruleId: "early", date: "2026-09-15" },
+        { eventId: "spadie-43rd-2026", ruleId: "middle", date: "2026-09-22" },
+        { eventId: "spadie-43rd-2026", ruleId: "middle", date: "2026-09-28" },
+        { eventId: "spadie-43rd-2026", ruleId: "middle", date: "2026-10-04" },
+        { eventId: "spadie-43rd-2026", ruleId: "middle", date: "2026-10-10" },
         { eventId: "jopt-tokyo-01-2027", ruleId: "fixed-3m", date: "2026-09-24" },
         { eventId: "jopt-tokyo-01-2027", ruleId: "fixed-1m", date: "2026-09-24" },
         { eventId: "jopt-tokyo-01-2027", ruleId: "fixed-3w", date: "2026-11-17" },
@@ -1615,7 +1622,8 @@
         { eventId: "tpc17-2026", ruleId: "early", anchorDate: "2026-07-15" },
         { eventId: "tpc17-2026", ruleId: "middle", anchorDate: "2026-07-15" },
         { eventId: "tpc18-spadie-2026", ruleId: "early", anchorDate: "2026-09-02" },
-        { eventId: "tpc18-spadie-2026", ruleId: "middle", anchorDate: "2026-09-02" }
+        { eventId: "tpc18-spadie-2026", ruleId: "middle", anchorDate: "2026-09-02" },
+        { eventId: "spadie-43rd-2026", ruleId: "early", anchorDate: "2026-09-01" }
       ];
 
       function getDefaultSentDeliveries() {
@@ -1818,36 +1826,52 @@
             const buffer = rule.interval;
             const phaseStart = resolveOffset(event.startDate, rule.start);
             const phaseEnd = resolveOffset(event.startDate, rule.end);
+            const primaryStart =
+              rule.id === "early"
+                ? getPinnedFixedDate(event.id, "fixed-3m") ||
+                  resolveOffset(event.startDate, { unit: "months", value: -3 })
+                : null;
+            const earlyFloor = primaryStart ? addDays(primaryStart, buffer) : null;
 
             for (const row of rows) {
               if (row.event.id !== event.id || row.rule.id !== rule.id) continue;
               if (!row.assignedDate || row.status === "sent" || row.dateLocked) continue;
 
-              for (const fixedDate of fixedDates) {
-                const daysAfter = diffDays(row.assignedDate, fixedDate);
-                if (daysAfter <= 0 || daysAfter >= buffer) continue;
-
-                const rescheduled = findNextOpenGridDate(
-                  event.id,
-                  rule.id,
-                  phaseStart,
-                  phaseEnd,
-                  buffer,
-                  addDays(fixedDate, buffer),
-                  rows,
-                  row.id
-                );
-                if (rescheduled) {
-                  row.assignedDate = rescheduled;
-                  row.idealDate = rescheduled;
-                  row.status = "adjusted";
-                  row.reasons = [...new Set([...(row.reasons || []), "固定配信後の間隔確保"])];
-                } else {
-                  row.assignedDate = null;
-                  row.status = "blocked";
-                  row.reasons = [...new Set([...(row.reasons || []), "固定配信後の間隔確保"])];
+              let needsMove = false;
+              let moveFrom = null;
+              if (earlyFloor && row.assignedDate < earlyFloor) {
+                needsMove = true;
+                moveFrom = earlyFloor;
+              } else {
+                for (const fixedDate of fixedDates) {
+                  const daysAfter = diffDays(row.assignedDate, fixedDate);
+                  if (daysAfter <= 0 || daysAfter >= buffer) continue;
+                  needsMove = true;
+                  moveFrom = addDays(fixedDate, buffer);
+                  break;
                 }
-                break;
+              }
+              if (!needsMove || !moveFrom) continue;
+
+              const rescheduled = findNextOpenGridDate(
+                event.id,
+                rule.id,
+                phaseStart,
+                phaseEnd,
+                buffer,
+                moveFrom,
+                rows,
+                row.id
+              );
+              if (rescheduled) {
+                row.assignedDate = rescheduled;
+                row.idealDate = rescheduled;
+                row.status = "adjusted";
+                row.reasons = [...new Set([...(row.reasons || []), "固定配信後の間隔確保"])];
+              } else {
+                row.assignedDate = null;
+                row.status = "blocked";
+                row.reasons = [...new Set([...(row.reasons || []), "固定配信後の間隔確保"])];
               }
             }
           }
@@ -3221,6 +3245,13 @@
           if (sameDate(date, addDays(fixedDate, -1))) return true;
           const daysAfter = diffDays(date, fixedDate);
           if (daysAfter > 0 && daysAfter < buffer) return true;
+        }
+        // 早期募集は一次募集開始より前に置かない（開始日+間隔未満も避ける）
+        if (rule.id === "early") {
+          const primaryStart =
+            getPinnedFixedDate(event.id, "fixed-3m") ||
+            resolveOffset(event.startDate, { unit: "months", value: -3 });
+          if (primaryStart && date < addDays(primaryStart, buffer)) return true;
         }
         return false;
       }
