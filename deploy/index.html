@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="deploy-revision" content="2026-09-04-1148" />
+    <meta name="deploy-revision" content="2026-09-04-1226" />
     <title>LINEディーラー募集配信スケジュール</title>
     <style>
       :root {
@@ -481,7 +481,11 @@
         background: #bef264;
       }
 
-      .day.heat-4plus {
+      .day.heat-4 {
+        background: #fed7aa;
+      }
+
+      .day.heat-5plus {
         background: #fecaca;
       }
 
@@ -501,7 +505,11 @@
         background: #d9f99d;
       }
 
-      .day.outside.heat-4plus {
+      .day.outside.heat-4 {
+        background: #ffedd5;
+      }
+
+      .day.outside.heat-5plus {
         background: #fecaca;
       }
 
@@ -519,7 +527,7 @@
         text-align: center;
       }
 
-      .day.heat-4plus .day-count {
+      .day.heat-5plus .day-count {
         background: var(--rose-600);
         color: var(--white);
       }
@@ -1480,7 +1488,7 @@
               <button class="button" id="nextMonth" type="button">次の月 →</button>
             </div>
             <div class="panel-body" style="padding-top:0;padding-bottom:10px">
-              <p class="panel-note" style="margin:0">ヒートマップ: 0件=白 / 1件=薄緑 / 2件=緑 / 3件=黄緑 / 4件以上=赤（地方LINEとの同日重複OK・同日最大3件）</p>
+              <p class="panel-note" style="margin:0">ヒートマップ: 0件=白 / 1件=薄緑 / 2件=緑 / 3件=黄緑 / 4件=オレンジ / 5件以上=赤（東京・大阪・福岡・札幌は同日配信OK、東京は1日1イベントまで）</p>
             </div>
             <div class="calendar-wrap">
               <div class="calendar" id="calendar"></div>
@@ -1544,7 +1552,7 @@
       const MS_DAY = 24 * 60 * 60 * 1000;
       const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"];
       const FIXED_NEAR_BUFFER_DAYS = 7;
-      const DENSITY_MAX_PER_DAY = 3;
+      const DENSITY_MAX_PER_DAY = 4;
       const DENSITY_MAX_SHIFT_DAYS = 7;
       const RECRUITMENT_PHASES = [
         { id: "start", label: "募集開始", rules: ["fixed-3m", "fixed-1m", "early"] },
@@ -1721,6 +1729,7 @@
           for (const other of rows) {
             if (
               other.id === row.id ||
+              other.event.id === event.id ||
               !other.assignedDate ||
               other.event.lineAccount !== accountId ||
               !sameDate(other.assignedDate, target) ||
@@ -2092,7 +2101,7 @@
         );
       }
 
-      function tokyoDayTaken(rows, date, ignoreRowId = null) {
+      function tokyoDayTakenByOtherEvent(rows, date, eventId, ignoreRowId = null) {
         const key = toInputDate(date);
         return rows.some(
           (row) =>
@@ -2100,6 +2109,7 @@
             row.assignedDate &&
             row.status !== "sent" &&
             row.event.lineAccount === "tokyo" &&
+            row.event.id !== eventId &&
             toInputDate(row.assignedDate) === key
         );
       }
@@ -2112,8 +2122,13 @@
           for (const offset of offsets) {
             const candidate = addDays(idealDate, offset);
             if (candidate < phaseStart || candidate > phaseEnd) continue;
-            if (prevDate && Math.abs(diffDays(candidate, prevDate)) < minGap) continue;
-            if (row.event.lineAccount === "tokyo" && tokyoDayTaken(rows, candidate, row.id)) continue;
+            if (prevDate && diffDays(candidate, prevDate) < minGap) continue;
+            if (
+              row.event.lineAccount === "tokyo" &&
+              tokyoDayTakenByOtherEvent(rows, candidate, row.event.id, row.id)
+            ) {
+              continue;
+            }
             const ownSameDay = rows.some(
               (other) =>
                 other.id !== row.id &&
@@ -2171,6 +2186,7 @@
           for (const other of rows) {
             if (
               other.id === row.id ||
+              other.event.id === event.id ||
               !other.assignedDate ||
               other.event.lineAccount !== event.lineAccount ||
               !ACCOUNT_DAY_UNIQUE_IDS.has(event.lineAccount) ||
@@ -2555,8 +2571,8 @@
         fukuoka: { id: "fukuoka", name: "JOPT Fukuoka LINE", shortName: "福岡", color: "#14b8a6" },
         sapporo: { id: "sapporo", name: "JOPT Sapporo LINE", shortName: "札幌", color: "#64748b" }
       };
-      const NO_CONSECUTIVE_ACCOUNT_IDS = new Set(["tokyo"]);
-      const ACCOUNT_DAY_UNIQUE_IDS = new Set(["tokyo", "osaka"]);
+      const NO_CONSECUTIVE_ACCOUNT_IDS = new Set();
+      const ACCOUNT_DAY_UNIQUE_IDS = new Set(["tokyo"]);
       const INTERVAL_REALIGN_FROM = "2026-07-28";
 
       const events = [
@@ -3074,7 +3090,8 @@
         if (count === 1) return "heat-1";
         if (count === 2) return "heat-2";
         if (count === 3) return "heat-3";
-        return "heat-4plus";
+        if (count === 4) return "heat-4";
+        return "heat-5plus";
       }
 
       function renderFixedRules() {
@@ -3315,23 +3332,28 @@
       }
 
       function pickRowsToMoveForAccountConflict(groupRows) {
+        const eventIds = new Set(groupRows.map((row) => row.event.id));
+        if (eventIds.size <= 1) return [];
+
         const periodicRows = groupRows.filter((row) => row.rule.kind !== "fixed");
         const fixedRows = groupRows.filter((row) => row.rule.kind === "fixed");
         if (!periodicRows.length) return [];
 
         if (fixedRows.length) {
-          return periodicRows.filter((row) => !isRowDateLocked(row));
+          const fixedEventIds = new Set(fixedRows.map((row) => row.event.id));
+          return periodicRows.filter(
+            (row) => !fixedEventIds.has(row.event.id) && !isRowDateLocked(row)
+          );
         }
 
         const lockedRows = periodicRows.filter(isRowDateLocked);
-        if (lockedRows.length > 1) {
-          return periodicRows.filter((row) => !isRowDateLocked(row));
-        }
-
-        const sorted = [...periodicRows].sort((a, b) => rowKeepPriority(b) - rowKeepPriority(a));
-        const keepIds = new Set(sorted.slice(0, 1).map((row) => row.id));
-        for (const row of lockedRows) keepIds.add(row.id);
-        return periodicRows.filter((row) => !keepIds.has(row.id) && !isRowDateLocked(row));
+        const lockedEventIds = new Set(lockedRows.map((row) => row.event.id));
+        const keepEventId = lockedEventIds.size
+          ? [...lockedRows].sort((a, b) => rowKeepPriority(b) - rowKeepPriority(a))[0].event.id
+          : [...periodicRows].sort((a, b) => rowKeepPriority(b) - rowKeepPriority(a))[0].event.id;
+        return periodicRows.filter(
+          (row) => row.event.id !== keepEventId && !isRowDateLocked(row)
+        );
       }
 
       function rebuildGlobalCountByDate(rows) {
@@ -3579,7 +3601,12 @@
       function diagnosePlacement(date, item, occupied, accountEvents, periodicByEvent = {}) {
         const key = toInputDate(date);
         const failures = [];
-        if (ACCOUNT_DAY_UNIQUE_IDS.has(item.event.lineAccount) && occupied.has(key)) {
+        const incumbent = occupied.get(key);
+        if (
+          ACCOUNT_DAY_UNIQUE_IDS.has(item.event.lineAccount) &&
+          incumbent &&
+          incumbent.event.id !== item.event.id
+        ) {
           failures.push("account");
         }
         if (
@@ -3633,7 +3660,7 @@
           for (const offset of offsets) {
             const candidate = addDays(item.idealDate, offset);
             if (!canPlace(candidate, item, occupied, accountEvents, periodicByEvent)) continue;
-            // 地方LINEとの同日重複は許可。全体で4件目になる日だけ避ける。
+            // 地域別LINEとの同日重複は許可。全体で5件目になる日だけ避ける。
             if (isInterval && wouldExceedDensity(globalCountByDate, candidate)) continue;
             options.push({
               date: candidate,
@@ -3657,7 +3684,7 @@
             : { reasons: [], priorityEvent: null };
         const reasons = [...built.reasons];
         if (isInterval && best.offset !== 0 && wouldExceedDensity(globalCountByDate, item.idealDate)) {
-          reasons.push("同日4件超過回避");
+          reasons.push("同日5件超過回避");
         }
 
         return { date: best.date, reasons, priorityEvent: built.priorityEvent };
@@ -3708,19 +3735,33 @@
           groups.get(groupKey).push(row);
         }
         for (const [, periodicRows] of groups) {
-          if (periodicRows.length <= 1) continue;
+          if (!periodicRows.length) continue;
           const dayKey = `${periodicRows[0].event.lineAccount}:${toInputDate(periodicRows[0].assignedDate)}`;
-          const hasFixed = rows.some(
+          const fixedRows = rows.filter(
             (row) =>
               row.assignedDate &&
               row.rule.kind === "fixed" &&
               `${row.event.lineAccount}:${toInputDate(row.assignedDate)}` === dayKey
           );
-          if (hasFixed) return true;
+          const dayEventIds = new Set([
+            ...periodicRows.map((row) => row.event.id),
+            ...fixedRows.map((row) => row.event.id)
+          ]);
+          if (dayEventIds.size <= 1) continue;
+          if (fixedRows.length && periodicRows.some((row) => !isRowDateLocked(row))) return true;
 
-          const unlocked = periodicRows.filter((row) => !isRowDateLocked(row));
-          if (unlocked.length > 1) return true;
-          if (unlocked.length === 1 && periodicRows.some(isRowDateLocked)) return true;
+          const unlockedEventIds = new Set(
+            periodicRows.filter((row) => !isRowDateLocked(row)).map((row) => row.event.id)
+          );
+          if (unlockedEventIds.size > 1) return true;
+          if (
+            unlockedEventIds.size === 1 &&
+            periodicRows.some(
+              (row) => isRowDateLocked(row) && !unlockedEventIds.has(row.event.id)
+            )
+          ) {
+            return true;
+          }
         }
         return false;
       }
@@ -3919,6 +3960,7 @@
           for (const [, groupRows] of groups) {
             if (groupRows.length <= 1) continue;
             if (!ACCOUNT_DAY_UNIQUE_IDS.has(groupRows[0].event.lineAccount)) continue;
+            if (new Set(groupRows.map((row) => row.event.id)).size <= 1) continue;
 
             const periodicRows = groupRows.filter((row) => row.rule.kind !== "fixed");
             if (!periodicRows.length) continue;
@@ -3998,7 +4040,7 @@
             }
 
             item.assignedDate = result.date;
-            item.reasons = [...new Set([...(item.reasons || []), ...result.reasons, "同日4件超過回避"])];
+            item.reasons = [...new Set([...(item.reasons || []), ...result.reasons, "同日5件超過回避"])];
             item.status = sameDate(result.date, item.idealDate) ? "ok" : "adjusted";
             occupied.set(toInputDate(result.date), item);
             bumpDayDensity(globalCountByDate, result.date);
