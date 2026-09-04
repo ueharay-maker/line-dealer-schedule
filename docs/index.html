@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <meta name="deploy-revision" content="2026-09-04-1136" />
+    <meta name="deploy-revision" content="2026-09-04-1142" />
     <title>LINEディーラー募集配信スケジュール</title>
     <style>
       :root {
@@ -1613,7 +1613,7 @@
         { eventId: "jopt-tokyo-03-2026", ruleId: "early", date: "2026-07-31" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "middle", date: "2026-08-28" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "middle", date: "2026-09-04" },
-        { eventId: "jopt-tokyo-03-2026", ruleId: "middle", date: "2026-09-07" },
+        { eventId: "jopt-tokyo-03-2026", ruleId: "late", date: "2026-09-07" },
         { eventId: "spadie-fukuoka-01-2026", ruleId: "fixed-3m", date: "2026-08-12" },
         { eventId: "spadie-fukuoka-01-2026", ruleId: "fixed-1m", date: "2026-10-12" },
         { eventId: "spadie-fukuoka-01-2026", ruleId: "fixed-3w", date: "2026-10-06" }
@@ -1624,7 +1624,7 @@
         { eventId: "spadie-42nd-2026", ruleId: "late", anchorDate: "2026-07-23" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "early", anchorDate: "2026-07-21" },
         { eventId: "jopt-tokyo-03-2026", ruleId: "middle", anchorDate: "2026-08-28" },
-        { eventId: "jopt-tokyo-03-2026", ruleId: "late", anchorDate: "2026-09-08" },
+        { eventId: "jopt-tokyo-03-2026", ruleId: "late", anchorDate: "2026-09-07" },
         { eventId: "jopt-sapporo-02-2026", ruleId: "early", anchorDate: "2026-07-02" },
         { eventId: "tpc17-2026", ruleId: "early", anchorDate: "2026-07-15" },
         { eventId: "tpc17-2026", ruleId: "middle", anchorDate: "2026-07-15" },
@@ -2634,9 +2634,9 @@
           kind: "interval",
           rank: 40,
           name: "中期募集",
-          windowLabel: "2か月前〜1か月前",
+          windowLabel: "2か月前〜32日前",
           start: { unit: "months", value: -2 },
-          end: { unit: "months", value: -1 },
+          end: { unit: "days", value: -(SUBSIDY_CONFIRMATION_TARGET_DAYS + 1) },
           interval: 6
         },
         {
@@ -2644,8 +2644,8 @@
           kind: "interval",
           rank: 30,
           name: "終盤募集",
-          windowLabel: "1か月前〜2週間前",
-          start: { unit: "months", value: -1 },
+          windowLabel: "31日前〜2週間前",
+          start: { unit: "days", value: -SUBSIDY_CONFIRMATION_TARGET_DAYS },
           end: { unit: "days", value: -14 },
           interval: 4
         }
@@ -4104,14 +4104,14 @@
         return event.ruleLabels?.[rule.id] || rule.theme;
       }
 
-      function isSubsidyConfirmationMiddle(row) {
-        if (row.rule.id !== "middle" || !row.assignedDate) return false;
+      function isSubsidyConfirmationDelivery(row) {
+        if (!["middle", "late"].includes(row.rule.id) || !row.assignedDate) return false;
         const targetDate = addDays(row.event.startDate, -SUBSIDY_CONFIRMATION_TARGET_DAYS);
         const nearest = latestRows
           .filter(
             (candidate) =>
               candidate.event.id === row.event.id &&
-              candidate.rule.id === "middle" &&
+              ["middle", "late"].includes(candidate.rule.id) &&
               candidate.assignedDate
           )
           .sort((a, b) => {
@@ -4125,7 +4125,7 @@
       function phaseLabelFor(row) {
         if (row.rule.kind === "fixed") return ruleLabelFor(row.event, row.rule);
         const label = cardPhaseLabel(row.rule);
-        return isSubsidyConfirmationMiddle(row) ? `${label} / ${SUBSIDY_CONFIRMATION_LABEL}` : label;
+        return isSubsidyConfirmationDelivery(row) ? `${label} / ${SUBSIDY_CONFIRMATION_LABEL}` : label;
       }
 
       function cardTooltip(row) {
